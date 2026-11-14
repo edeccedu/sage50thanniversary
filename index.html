@@ -227,7 +227,7 @@
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
 
-    // --- Reflection Environment Map (Matches Cool Cyan Spotlights + Warm Amber Canopy) ---
+    // --- Reflection Environment Map ---
     function buildArenaEnvironment() {
       const pmrem = new THREE.PMREMGenerator(renderer);
       const envScene = new THREE.Scene();
@@ -238,7 +238,6 @@
       );
       envScene.add(dome);
 
-      // Cool cyan-white stadium lights & warm amber canopy glow for realistic metallic reflections
       const panels = [
         { pos: [-14, 16, 12], color: 0xd8f3ff, size: [9, 5] },
         { pos: [14, 16, 12], color: 0xd8f3ff, size: [9, 5] },
@@ -262,15 +261,13 @@
     }
     buildArenaEnvironment();
 
-    // --- Stadium Backdrop Replicating Reference Image ---
-    // 1. Warm Terracotta-Amber Upper Stadium Roof Canopy & Deep Navy-Slate Arena Wall
+    // --- Stadium Backdrop ---
     function createStadiumBackdropTexture() {
       const c = document.createElement('canvas');
       c.width = 1024;
       c.height = 512;
       const ctx = c.getContext('2d');
 
-      // Warm brownish-terracotta upper roof canopy (top ~30%)
       const roofGrad = ctx.createLinearGradient(0, 0, 0, 175);
       roofGrad.addColorStop(0.0, '#4a2518');
       roofGrad.addColorStop(0.65, '#3b1d14');
@@ -278,7 +275,6 @@
       ctx.fillStyle = roofGrad;
       ctx.fillRect(0, 0, 1024, 175);
 
-      // Subtle diagonal architectural roof ribs
       ctx.strokeStyle = 'rgba(255, 195, 145, 0.07)';
       ctx.lineWidth = 3;
       for (let x = -200; x < 1224; x += 48) {
@@ -288,7 +284,6 @@
         ctx.stroke();
       }
 
-      // Deep Navy-Slate Upper Arena Wall & Tiered Seating Backdrop
       const wallGrad = ctx.createLinearGradient(0, 165, 0, 512);
       wallGrad.addColorStop(0.0, '#101622');
       wallGrad.addColorStop(0.45, '#162030');
@@ -296,14 +291,12 @@
       ctx.fillStyle = wallGrad;
       ctx.fillRect(0, 165, 1024, 347);
 
-      // Soft blue ambient stage wash behind the cauldron
       const blueWash = ctx.createRadialGradient(512, 340, 30, 512, 340, 420);
       blueWash.addColorStop(0, 'rgba(90, 145, 195, 0.24)');
       blueWash.addColorStop(1, 'rgba(16, 22, 34, 0)');
       ctx.fillStyle = blueWash;
       ctx.fillRect(0, 165, 1024, 347);
 
-      // Horizontal Tiered Stadium Seating Steps (matching the horizontal step lines in the photo)
       for (let y = 265; y <= 495; y += 16) {
         ctx.fillStyle = 'rgba(10, 15, 24, 0.55)';
         ctx.fillRect(0, y, 1024, 4);
@@ -311,7 +304,6 @@
         ctx.fillRect(0, y + 4, 1024, 2);
       }
 
-      // Faint blue arena indicator dots along the upper tier
       for (let i = 0; i < 45; i++) {
         const dx = 180 + Math.random() * 664;
         const dy = 215 + Math.random() * 55;
@@ -333,7 +325,6 @@
     backdropPlane.position.set(0, 7.2, -14);
     scene.add(backdropPlane);
 
-    // 2. Cool Light-Grey Arena Floor (matching the floor in the photo)
     const arenaFloor = new THREE.Mesh(
       new THREE.PlaneGeometry(60, 28),
       new THREE.MeshStandardMaterial({
@@ -353,14 +344,13 @@
 
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      0.72, // bloom strength
-      0.52, // radius
-      0.80  // threshold
+      0.72,
+      0.52,
+      0.80
     );
     composer.addPass(bloomPass);
 
-    // --- Procedural Textures Matching the Beijing Cauldron in the Photo ---
-    // 1. Bowl Texture: Rich Metallic Red-Bronze with Dense Raised Gold Spiral Cloud Filigree
+    // --- Procedural Textures ---
     function createBowlTextures() {
       const w = 2048, h = 512;
       const colorCanvas = document.createElement('canvas');
@@ -371,7 +361,6 @@
       bumpCanvas.width = w; bumpCanvas.height = h;
       const bCtx = bumpCanvas.getContext('2d');
 
-      // Deep Copper-Crimson Metallic Base
       const grad = cCtx.createLinearGradient(0, 0, 0, h);
       grad.addColorStop(0, '#b82518');
       grad.addColorStop(0.5, '#9e1910');
@@ -382,13 +371,11 @@
       bCtx.fillStyle = '#303030';
       bCtx.fillRect(0, 0, w, h);
 
-      // Thin Metallic Gold Rim Lip
       cCtx.fillStyle = '#f5c767';
       cCtx.fillRect(0, 0, w, 16);
       bCtx.fillStyle = '#ffffff';
       bCtx.fillRect(0, 0, w, 16);
 
-      // Dense Interlocking Gold Spiral Scrolls Covering the Entire Bowl Surface (as seen in the photo)
       const cols = 18;
       const stepX = w / cols;
 
@@ -400,7 +387,6 @@
         ctx.lineCap = 'round';
         ctx.lineWidth = isBump ? 16 : 12;
 
-        // Multi-turn tight spiral
         ctx.beginPath();
         for (let a = 0; a < Math.PI * 4.2; a += 0.15) {
           const rad = (a / (Math.PI * 4.2)) * r;
@@ -411,7 +397,6 @@
         }
         ctx.stroke();
 
-        // Connecting S-curve scroll tail
         ctx.beginPath();
         ctx.moveTo(r, 0);
         ctx.bezierCurveTo(r * 1.25, -r * 0.55, r * 1.55, r * 0.55, r * 1.85, 0);
@@ -421,11 +406,9 @@
 
       for (let i = 0; i < cols; i++) {
         const cx = i * stepX + stepX * 0.5;
-        // Upper primary row of large spirals
         drawSpiralMotif(cCtx, cx, h * 0.36, 48, i % 2 === 0 ? 1 : -1, false);
         drawSpiralMotif(bCtx, cx, h * 0.36, 48, i % 2 === 0 ? 1 : -1, true);
 
-        // Lower secondary row of smaller spirals nested underneath
         drawSpiralMotif(cCtx, cx + stepX * 0.5, h * 0.74, 34, i % 2 === 0 ? -1 : 1, false);
         drawSpiralMotif(bCtx, cx + stepX * 0.5, h * 0.74, 34, i % 2 === 0 ? -1 : 1, true);
       }
@@ -440,14 +423,13 @@
       return { colorTex, bumpTex };
     }
 
-    // 2. Clean Matte Vermilion-Red Trapezoidal Plaque Texture (Matching the photo's clean red shield)
+    // Clean Solid Matte Vermilion-Red Plaque Texture (No text, badge, or rings)
     function createPlaqueTexture() {
       const canvas = document.createElement('canvas');
       canvas.width = 512;
       canvas.height = 1024;
       const ctx = canvas.getContext('2d');
 
-      // Matte Beijing Vermilion Red
       const grad = ctx.createLinearGradient(0, 0, 0, 1024);
       grad.addColorStop(0, '#cc1b18');
       grad.addColorStop(0.5, '#ba1614');
@@ -455,38 +437,12 @@
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 512, 1024);
 
-      // Subtle dark vertical emblem seal in the upper-center (matching the photo's dark emblem placement)
-      ctx.fillStyle = 'rgba(35, 8, 8, 0.78)';
-      ctx.beginPath();
-      ctx.roundRect(196, 135, 120, 155, 18);
-      ctx.fill();
-
-      ctx.fillStyle = '#f5d58c';
-      ctx.font = 'bold 64px Georgia, serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('50', 256, 232);
-
-      // Clean dark-ink & gold-accented calligraphy beneath the seal
-      ctx.fillStyle = 'rgba(35, 8, 8, 0.82)';
-      ctx.font = 'bold 48px "Noto Serif TC", "Songti TC", "PingFang HK", serif';
-      ctx.fillText('五十載', 256, 365);
-      ctx.fillText('耆康安老', 256, 430);
-
-      // Interlocking rings motif below the text (matching the rings on the red shield in the photo)
-      ctx.strokeStyle = 'rgba(40, 10, 10, 0.65)';
-      ctx.lineWidth = 5;
-      [-76, -38, 0, 38, 76].forEach((rx, idx) => {
-        ctx.beginPath();
-        ctx.arc(256 + rx, idx % 2 === 0 ? 505 : 525, 22, 0, Math.PI * 2);
-        ctx.stroke();
-      });
-
       const tex = new THREE.CanvasTexture(canvas);
       tex.colorSpace = THREE.SRGBColorSpace;
       return tex;
     }
 
-    // --- Build Exact Beijing-Style Cauldron From Reference Image ---
+    // --- Build Cauldron ---
     const cauldronGroup = new THREE.Group();
     scene.add(cauldronGroup);
 
@@ -506,17 +462,14 @@
       roughness: 0.22
     });
 
-    // Dark Gunmetal-Slate Pillars (matches the tall angled grey-bronze pillars in the photo)
     const pillarMat = new THREE.MeshStandardMaterial({
       color: 0x3b4048,
       metalness: 0.72,
       roughness: 0.35
     });
 
-    // 1. Two Tall Angled Pillars Resting Directly on the Grey Arena Floor (no extra step base)
     function createPillar(side) {
       const shape = new THREE.Shape();
-      // Slightly wider at the top, tapering smoothly down to the floor just like the photo
       shape.moveTo(-0.36, 0);
       shape.lineTo(0.36, 0);
       shape.lineTo(0.54, 3.85);
@@ -542,7 +495,6 @@
     cauldronGroup.add(createPillar(-1));
     cauldronGroup.add(createPillar(1));
 
-    // Warm orange-amber edge bounce light on the outer sides of the pillars (as seen in the photo)
     const leftEdgeLight = new THREE.PointLight(0xff7b29, 14, 9, 1.5);
     leftEdgeLight.position.set(-2.6, 1.8, 1.2);
     cauldronGroup.add(leftEdgeLight);
@@ -551,7 +503,6 @@
     rightEdgeLight.position.set(2.6, 1.8, 1.2);
     cauldronGroup.add(rightEdgeLight);
 
-    // 2. Exposed Golden Mechanical Burner Core Between the Shield and the Bowl
     const neckCylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.46, 0.72, 24), goldMat);
     neckCylinder.position.set(0, 3.68, 0);
     cauldronGroup.add(neckCylinder);
@@ -562,7 +513,6 @@
       cauldronGroup.add(pipe);
     });
 
-    // 3. Clean Matte Vermilion-Red Trapezoidal Plaque Suspended Between the Pillars
     const plaqueTex = createPlaqueTexture();
     const plaqueMat = new THREE.MeshStandardMaterial({
       map: plaqueTex,
@@ -587,7 +537,6 @@
     plaqueMesh.castShadow = true;
     cauldronGroup.add(plaqueMesh);
 
-    // 4. Wide Shallow Embossed Cloud-Scroll Bowl
     const bowlPoints = [
       new THREE.Vector2(0.0, 0.0),
       new THREE.Vector2(1.4, 0.04),
@@ -605,12 +554,11 @@
     bowlMesh.receiveShadow = true;
     cauldronGroup.add(bowlMesh);
 
-    // --- Stadium Floodlight Fixtures & Diagonal Cyan-White Beams (Matching the Photo) ---
+    // --- Stadium Floodlight Fixtures & Beams ---
     const beamMeshes = [];
     const fixtureMat = new THREE.MeshBasicMaterial({ color: 0xe8fbff });
 
     function createStadiumFloodlight(x, y, z, targetX, targetY, beamRadius, beamLength, opacity) {
-      // Glowing circular floodlight lamp head visible in the stadium background
       const housing = new THREE.Mesh(
         new THREE.CylinderGeometry(0.42, 0.36, 0.45, 20),
         new THREE.MeshStandardMaterial({ color: 0x1a222d, metalness: 0.8, roughness: 0.3 })
@@ -625,7 +573,6 @@
       lens.lookAt(targetX, targetY, 0);
       scene.add(lens);
 
-      // Diagonal Cyan-White Volumetric Beam
       const coneGeom = new THREE.ConeGeometry(beamRadius, beamLength, 32, 1, true);
       coneGeom.translate(0, -beamLength / 2, 0);
       const coneMat = new THREE.ShaderMaterial({
@@ -671,13 +618,11 @@
       beamMeshes.push({ cone, baseRotZ: cone.rotation.z, phase: Math.random() * Math.PI * 2 });
     }
 
-    // Replicating the 4 stadium floodlights from the photo (upper-left, upper-center-left, upper-right, mid-right)
     createStadiumFloodlight(-7.6, 8.8, -11.5, -13.5, 4.8, 2.6, 14, 0.24);
     createStadiumFloodlight(-0.6, 7.6, -11.8, -6.5, 4.2, 2.3, 13, 0.22);
     createStadiumFloodlight(7.2, 8.8, -11.5, 1.2, 4.4, 2.8, 15, 0.26);
     createStadiumFloodlight(10.2, 5.4, -10.5, 3.8, 1.2, 2.7, 13, 0.28);
 
-    // Arena Lighting (Keeps the Cauldron & Grey Floor Crisp and Clear)
     const hemiLight = new THREE.HemisphereLight(0xdceeff, 0x5c6875, 1.35);
     scene.add(hemiLight);
 
@@ -692,7 +637,6 @@
     scene.add(coolRightSpot);
     scene.add(coolRightSpot.target);
 
-    // Dynamic Fire Point Light
     const fireLight = new THREE.PointLight(0xff7b00, 0, 24, 1.3);
     fireLight.position.set(0, 5.6, 0.8);
     scene.add(fireLight);
@@ -819,7 +763,7 @@
     const sparkPoints = new THREE.Points(sparkGeom, sparkMat);
     cauldronGroup.add(sparkPoints);
 
-    // --- Responsive Framing: Cauldron = 1/2 Screen Height, >= 1/2 Screen Width ---
+    // --- Responsive Framing ---
     function updateFraming() {
       const w = window.innerWidth;
       const h = window.innerHeight;
@@ -837,7 +781,6 @@
       const scaleX = Math.max(scaleY, (visibleWidthAtZero * 0.56) / 8.84);
 
       cauldronGroup.scale.set(scaleX, scaleY, scaleY);
-      // Anchor pillars right onto the grey arena floor near the bottom of the screen
       cauldronGroup.position.y = 3.2 - (visibleHeightAtZero * 0.46);
       arenaFloor.position.y = cauldronGroup.position.y;
     }
@@ -884,7 +827,6 @@
       }
       sparkGeom.attributes.position.needsUpdate = true;
 
-      // Subtle atmospheric shimmer in the stadium spotlight beams
       beamMeshes.forEach((b) => {
         b.cone.rotation.z = b.baseRotZ + Math.sin(elapsed * 0.35 + b.phase) * 0.025;
       });
