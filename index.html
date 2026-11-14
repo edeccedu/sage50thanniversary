@@ -8,7 +8,7 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: #09060c;
+      background-color: #060306;
       color: #fff;
       font-family: 'Noto Serif TC', 'Songti TC', 'PMingLiU', 'PingFang HK', serif;
       overflow: hidden;
@@ -25,70 +25,107 @@
       z-index: 1;
     }
 
-    /* Subtle Ceremonial Edge Vignette */
+    /* Deep Ceremonial Vignette */
     .cinema-vignette {
       position: fixed;
       inset: 0;
-      background: radial-gradient(circle at 50% 50%, transparent 64%, rgba(6, 2, 5, 0.52) 100%);
+      background: radial-gradient(circle at 50% 52%, transparent 52%, rgba(4, 1, 3, 0.72) 100%);
       pointer-events: none;
       z-index: 2;
     }
 
-    /* Grand Ceremonial Slogan Reveal Overlay */
-    .banner-container {
+    /* Flanking Ceremonial Vertical Slogan Scrolls (Left & Right - Zero Fire Overlap) */
+    .scroll-couplet {
       position: fixed;
-      top: 4.2vh;
-      left: 0;
-      width: 100%;
+      top: 10vh;
+      bottom: 10vh;
       z-index: 6;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 2.5vw;
-      opacity: 0;
-      transform: translateY(-28px) scale(0.94);
-      transition: all 2.2s cubic-bezier(0.16, 1, 0.3, 1);
-      pointer-events: none;
-    }
-    .banner-container.visible {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-
-    .laurel {
-      height: 14.5vh;
-      min-height: 92px;
-      filter: drop-shadow(0 0 20px rgba(255, 205, 75, 0.95));
-    }
-
-    .slogan-plaque {
-      background: linear-gradient(180deg, rgba(44, 8, 10, 0.92) 0%, rgba(18, 3, 5, 0.96) 100%);
-      border-top: 2.5px solid rgba(255, 224, 125, 0.95);
-      border-bottom: 2.5px solid rgba(255, 224, 125, 0.95);
-      padding: 1.6vh 4.4vw;
-      box-shadow: 0 20px 55px rgba(0, 0, 0, 0.85), inset 0 0 36px rgba(255, 195, 65, 0.28);
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: all 2.2s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
     }
 
-    .slogan-title {
-      font-size: 4.8vh;
+    .scroll-left {
+      left: 4.5vw;
+      transform: translateX(-36px) scale(0.95);
+    }
+
+    .scroll-right {
+      right: 4.5vw;
+      transform: translateX(36px) scale(0.95);
+    }
+
+    .scroll-couplet.visible {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+
+    .ceremonial-scroll-frame {
+      position: relative;
+      background: linear-gradient(180deg, rgba(46, 7, 10, 0.90) 0%, rgba(22, 3, 5, 0.95) 50%, rgba(46, 7, 10, 0.90) 100%);
+      border: 2px solid rgba(246, 206, 108, 0.92);
+      box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.88),
+        0 0 38px rgba(218, 165, 32, 0.24),
+        inset 0 0 28px rgba(255, 195, 65, 0.22);
+      padding: 2.6vh 1.8vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 76vh;
+      min-height: 460px;
+    }
+
+    /* Inner Double 24K Gold Filigree Border */
+    .ceremonial-scroll-frame::before {
+      content: '';
+      position: absolute;
+      inset: 7px;
+      border: 1px solid rgba(255, 224, 130, 0.58);
+      pointer-events: none;
+    }
+
+    .scroll-crest {
+      width: 5.4vh;
+      min-width: 38px;
+      height: 5.4vh;
+      min-height: 38px;
+      filter: drop-shadow(0 0 12px rgba(255, 205, 75, 0.85));
+    }
+
+    .scroll-vertical-text {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      font-size: 4.6vh;
       font-weight: 900;
-      letter-spacing: 0.36em;
-      margin-right: -0.36em;
-      background: linear-gradient(180deg, #ffffff 0%, #ffea92 45%, #d69c24 85%, #fff6c8 100%);
+      letter-spacing: 0.28em;
+      margin-bottom: -0.28em;
+      background: linear-gradient(180deg, #ffffff 0%, #ffec9e 35%, #e2a829 72%, #fff6c8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 2px 14px rgba(255, 180, 0, 0.9));
-      line-height: 1.32;
+      filter: drop-shadow(0 2px 12px rgba(255, 175, 0, 0.85));
+      line-height: 1.2;
+      user-select: none;
+    }
+
+    .scroll-divider-dot {
+      width: 8px;
+      height: 8px;
+      background: radial-gradient(circle, #fff6c8 0%, #d69c24 100%);
+      transform: rotate(45deg);
+      box-shadow: 0 0 10px rgba(255, 205, 75, 0.9);
     }
 
     #setup-badge {
       position: fixed;
       top: 16px;
       left: 16px;
-      background: rgba(18, 10, 14, 0.92);
+      background: rgba(18, 8, 12, 0.92);
       border: 1px solid rgba(255, 215, 0, 0.6);
       color: #ffd700;
       padding: 12px 16px;
@@ -124,40 +161,42 @@
   <div id="webgl-container"></div>
   <div class="cinema-vignette"></div>
 
-  <!-- Ceremonial Slogan Reveal -->
-  <div class="banner-container" id="ceremony-slogan">
-    <svg class="laurel" viewBox="0 0 120 120">
-      <path d="M 22 48 C 16 76 36 96 60 96 C 84 96 104 76 98 48" fill="none" stroke="#ffd866" stroke-width="2.5" stroke-dasharray="2,2" />
-      <path d="M 22 58 A 38 38 0 0 0 98 58" fill="none" stroke="#ffd866" stroke-width="1.5" />
-      <g stroke="#ffd866" fill="#ffd866">
-        <path d="M 22 48 C 16 43 11 43 13 53 C 16 48 19 46 22 48 Z" />
-        <path d="M 26 64 C 19 61 15 64 18 72 C 21 67 24 65 26 64 Z" />
-        <path d="M 36 80 C 29 80 27 85 32 92 C 34 87 36 84 36 80 Z" />
-        <path d="M 98 48 C 104 43 109 43 107 53 C 104 48 101 46 98 48 Z" />
-        <path d="M 94 64 C 101 61 105 64 102 72 C 99 67 96 65 94 64 Z" />
-        <path d="M 84 80 C 91 80 93 85 88 92 C 86 87 84 84 84 80 Z" />
-      </g>
-      <text x="50%" y="56" font-family="Georgia, serif" font-weight="900" font-size="30" fill="#fff7cc" text-anchor="middle">50</text>
-    </svg>
-
-    <div class="slogan-plaque">
-      <h1 class="slogan-title">五十載耆康安老</h1>
-      <h1 class="slogan-title">以初心關顧同行</h1>
+  <!-- Left Ceremonial Scroll (Lower Couplet / 下聯) -->
+  <div class="scroll-couplet scroll-left" id="ceremony-scroll-left">
+    <div class="ceremonial-scroll-frame">
+      <svg class="scroll-crest" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="42" fill="none" stroke="#ffd866" stroke-width="2" stroke-dasharray="3,2"/>
+        <circle cx="50" cy="50" r="34" fill="none" stroke="#ffd866" stroke-width="1.2"/>
+        <text x="50%" y="58" font-family="Georgia, serif" font-weight="900" font-size="28" fill="#fff7cc" text-anchor="middle">50</text>
+      </svg>
+      <div class="scroll-divider-dot"></div>
+      <h2 class="scroll-vertical-text">以初心關顧同行</h2>
+      <div class="scroll-divider-dot"></div>
+      <svg class="scroll-crest" viewBox="0 0 100 100">
+        <path d="M20 65 Q35 35 50 55 Q65 35 80 65" fill="none" stroke="#ffd866" stroke-width="3" stroke-linecap="round"/>
+        <path d="M28 74 Q50 58 72 74" fill="none" stroke="#ffd866" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="50" cy="34" r="5" fill="#fff7cc"/>
+      </svg>
     </div>
+  </div>
 
-    <svg class="laurel" viewBox="0 0 120 120">
-      <path d="M 22 48 C 16 76 36 96 60 96 C 84 96 104 76 98 48" fill="none" stroke="#ffd866" stroke-width="2.5" stroke-dasharray="2,2" />
-      <path d="M 22 58 A 38 38 0 0 0 98 58" fill="none" stroke="#ffd866" stroke-width="1.5" />
-      <g stroke="#ffd866" fill="#ffd866">
-        <path d="M 22 48 C 16 43 11 43 13 53 C 16 48 19 46 22 48 Z" />
-        <path d="M 26 64 C 19 61 15 64 18 72 C 21 67 24 65 26 64 Z" />
-        <path d="M 36 80 C 29 80 27 85 32 92 C 34 87 36 84 36 80 Z" />
-        <path d="M 98 48 C 104 43 109 43 107 53 C 104 48 101 46 98 48 Z" />
-        <path d="M 94 64 C 101 61 105 64 102 72 C 99 67 96 65 94 64 Z" />
-        <path d="M 84 80 C 91 80 93 85 88 92 C 86 87 84 84 84 80 Z" />
-      </g>
-      <text x="50%" y="56" font-family="Georgia, serif" font-weight="900" font-size="30" fill="#fff7cc" text-anchor="middle">50</text>
-    </svg>
+  <!-- Right Ceremonial Scroll (Upper Couplet / 上聯) -->
+  <div class="scroll-couplet scroll-right" id="ceremony-scroll-right">
+    <div class="ceremonial-scroll-frame">
+      <svg class="scroll-crest" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="42" fill="none" stroke="#ffd866" stroke-width="2" stroke-dasharray="3,2"/>
+        <circle cx="50" cy="50" r="34" fill="none" stroke="#ffd866" stroke-width="1.2"/>
+        <text x="50%" y="58" font-family="Georgia, serif" font-weight="900" font-size="28" fill="#fff7cc" text-anchor="middle">50</text>
+      </svg>
+      <div class="scroll-divider-dot"></div>
+      <h2 class="scroll-vertical-text">五十載耆康安老</h2>
+      <div class="scroll-divider-dot"></div>
+      <svg class="scroll-crest" viewBox="0 0 100 100">
+        <path d="M20 65 Q35 35 50 55 Q65 35 80 65" fill="none" stroke="#ffd866" stroke-width="3" stroke-linecap="round"/>
+        <path d="M28 74 Q50 58 72 74" fill="none" stroke="#ffd866" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="50" cy="34" r="5" fill="#fff7cc"/>
+      </svg>
+    </div>
   </div>
 
   <script type="module">
@@ -170,7 +209,8 @@
     let heatValue = 0;
     let targetHeat = 0;
 
-    const sloganBanner = document.getElementById('ceremony-slogan');
+    const scrollLeft = document.getElementById('ceremony-scroll-left');
+    const scrollRight = document.getElementById('ceremony-scroll-right');
     const setupBadge = document.getElementById('setup-badge');
 
     document.addEventListener('keydown', (e) => {
@@ -224,10 +264,10 @@
     // --- Three.js Ultra-HD Scene, Camera & Renderer ---
     const container = document.getElementById('webgl-container');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0b0812);
-    scene.fog = new THREE.FogExp2(0x100b18, 0.0095);
+    scene.background = new THREE.Color(0x070408);
+    scene.fog = new THREE.FogExp2(0x080408, 0.014);
 
-    const camera = new THREE.PerspectiveCamera(33, window.innerWidth / window.innerHeight, 0.1, 240);
+    const camera = new THREE.PerspectiveCamera(33, window.innerWidth / window.innerHeight, 0.1, 200);
     camera.position.set(0, 3.85, 17.8);
     camera.lookAt(0, 3.35, 0);
 
@@ -237,10 +277,9 @@
       precision: 'highp'
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    // Unlock crisp 4K / Retina pixel density up to 3.0x
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.26;
+    renderer.toneMappingExposure = 1.24;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
@@ -248,28 +287,28 @@
     const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
 
     // =========================================================================
-    // 1. GRAND CEREMONIAL GALA ENVIRONMENT MAP (Warm Gold & Cool Starlight)
+    // 1. DARK, CEREMONIOUS & PROSPEROUS STUDIO REFLECTION ENVIRONMENT
     // =========================================================================
-    function buildProsperousGalaEnvironment() {
+    function buildDarkCeremonialEnvironment() {
       const pmrem = new THREE.PMREMGenerator(renderer);
       const envScene = new THREE.Scene();
 
-      // Deep imperial burgundy-navy gala dome
+      // Deep dark crimson-obsidian ceremonial hall dome
       const dome = new THREE.Mesh(
         new THREE.SphereGeometry(60, 48, 24),
-        new THREE.MeshBasicMaterial({ color: 0x1c1118, side: THREE.BackSide })
+        new THREE.MeshBasicMaterial({ color: 0x14080d, side: THREE.BackSide })
       );
       envScene.add(dome);
 
-      // Warm golden chandelier light banks + crisp white broadcast softboxes
+      // Warm golden ceremonial softboxes for rich metallic specular highlights
       const softboxes = [
-        { pos: [-16, 22, 14], color: 0xfff3db, size: [7, 20] },
-        { pos: [16, 22, 14], color: 0xfff3db, size: [7, 20] },
-        { pos: [-6, 26, 8], color: 0xffffff, size: [9, 12] },
-        { pos: [6, 26, 8], color: 0xffe8bd, size: [9, 12] },
-        { pos: [-16, 5, 10], color: 0xffa64d, size: [5, 18] },
-        { pos: [16, 5, 10], color: 0xffa64d, size: [5, 18] },
-        { pos: [0, -12, 10], color: 0x5c2420, size: [36, 18] }
+        { pos: [-16, 22, 14], color: 0xfff0d0, size: [6, 20] },
+        { pos: [16, 22, 14], color: 0xfff0d0, size: [6, 20] },
+        { pos: [-6, 26, 8], color: 0xffffff, size: [8, 12] },
+        { pos: [6, 26, 8], color: 0xffe4b2, size: [8, 12] },
+        { pos: [-16, 5, 10], color: 0xff9e44, size: [4, 18] },
+        { pos: [16, 5, 10], color: 0xff9e44, size: [4, 18] },
+        { pos: [0, -12, 10], color: 0x3b1414, size: [36, 18] }
       ];
       softboxes.forEach(sb => {
         const panel = new THREE.Mesh(
@@ -285,10 +324,10 @@
       scene.environment = envRT.texture;
       pmrem.dispose();
     }
-    buildProsperousGalaEnvironment();
+    buildDarkCeremonialEnvironment();
 
     // =========================================================================
-    // 2. HIGH-RESOLUTION PROCEDURAL PBR TEXTURES (1024px - 2048px)
+    // 2. HIGH-RESOLUTION PROCEDURAL PBR TEXTURES
     // =========================================================================
     function createBrushedMetalMaps() {
       const size = 1024;
@@ -349,35 +388,35 @@
       return { roughnessMap, normalMap };
     }
 
-    function createLuxuryMarbleTexture() {
+    function createDarkObsidianMarbleTexture() {
       const size = 2048;
       const canvas = document.createElement('canvas');
       canvas.width = size; canvas.height = size;
       const ctx = canvas.getContext('2d');
 
-      // Deep imperial obsidian-burgundy stone base
-      ctx.fillStyle = '#1b1620';
+      // Deep dark obsidian stone base
+      ctx.fillStyle = '#0d090e';
       ctx.fillRect(0, 0, size, size);
 
-      // Rich gold & warm ivory marble veining
-      for (let v = 0; v < 42; v++) {
+      // Subtle 24K gold & warm bronze mineral veining
+      for (let v = 0; v < 36; v++) {
         ctx.beginPath();
         let px = Math.random() * size;
         let py = Math.random() * size;
         ctx.moveTo(px, py);
-        for (let step = 0; step < 24; step++) {
+        for (let step = 0; step < 22; step++) {
           px += (Math.random() - 0.35) * 140;
           py += (Math.random() - 0.35) * 140;
           ctx.lineTo(px, py);
         }
-        ctx.strokeStyle = v % 2 === 0 ? 'rgba(235, 190, 110, 0.18)' : 'rgba(210, 175, 165, 0.11)';
-        ctx.lineWidth = Math.random() * 3.2 + 0.8;
+        ctx.strokeStyle = v % 2 === 0 ? 'rgba(235, 188, 102, 0.14)' : 'rgba(150, 95, 95, 0.08)';
+        ctx.lineWidth = Math.random() * 2.8 + 0.6;
         ctx.stroke();
       }
 
-      // 24K Gold architectural stone slab grid joints
-      ctx.strokeStyle = 'rgba(235, 192, 110, 0.28)';
-      ctx.lineWidth = 3;
+      // Fine gold stone slab joints
+      ctx.strokeStyle = 'rgba(235, 190, 105, 0.20)';
+      ctx.lineWidth = 2.5;
       for (let g = 0; g <= size; g += 512) {
         ctx.beginPath(); ctx.moveTo(g, 0); ctx.lineTo(g, size); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(0, g); ctx.lineTo(size, g); ctx.stroke();
@@ -391,9 +430,61 @@
       return tex;
     }
 
-    // =========================================================================
-    // ULTRA-CRISP 2048x2304 SAGE 50TH ANNIVERSARY PLAQUE LOGO (Matches SAGE 50.pdf)
-    // =========================================================================
+    // Minimalist, Dignified Dark Crimson & Gold Ceremonial Backdrop Texture
+    function createCeremonialBackdropTexture() {
+      const w = 2048;
+      const h = 1024;
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+
+      // Deep dark imperial crimson-to-obsidian radial aura behind the cauldron
+      const radGrad = ctx.createRadialGradient(w * 0.5, h * 0.52, 40, w * 0.5, h * 0.52, w * 0.55);
+      radGrad.addColorStop(0.0, '#2a090d');
+      radGrad.addColorStop(0.38, '#170508');
+      radGrad.addColorStop(0.75, '#0b0407');
+      radGrad.addColorStop(1.0, '#060306');
+      ctx.fillStyle = radGrad;
+      ctx.fillRect(0, 0, w, h);
+
+      // Subtle concentric golden halo rings centered behind the cauldron
+      ctx.save();
+      ctx.translate(w * 0.5, h * 0.54);
+      [210, 320, 440].forEach((r, idx) => {
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(240, 194, 102, ${0.14 - idx * 0.035})`;
+        ctx.lineWidth = idx === 0 ? 2.5 : 1.5;
+        ctx.stroke();
+      });
+
+      // Subtle radiating golden ceremonial light rays (low-contrast & refined)
+      for (let i = 0; i < 36; i++) {
+        const angle = (i / 36) * Math.PI * 2;
+        ctx.save();
+        ctx.rotate(angle);
+        const rayGrad = ctx.createLinearGradient(0, 120, 0, 560);
+        rayGrad.addColorStop(0, 'rgba(245, 200, 105, 0.08)');
+        rayGrad.addColorStop(1, 'rgba(245, 200, 105, 0.0)');
+        ctx.fillStyle = rayGrad;
+        ctx.beginPath();
+        ctx.moveTo(-4, 120);
+        ctx.lineTo(4, 120);
+        ctx.lineTo(18, 560);
+        ctx.lineTo(-18, 560);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
+
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = maxAnisotropy;
+      return tex;
+    }
+
+    // Ultra-Crisp 2048x2304 SAGE 50th Anniversary Plaque Logo
     function createSage50PlaqueMaps() {
       const w = 2048;
       const h = 2304;
@@ -405,7 +496,6 @@
       bumpCanvas.width = w; bumpCanvas.height = h;
       const bCtx = bumpCanvas.getContext('2d');
 
-      // Deep Piano-Lacquer Imperial Vermilion Base
       const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
       bgGrad.addColorStop(0, '#cc1814');
       bgGrad.addColorStop(0.55, '#b5120e');
@@ -418,12 +508,10 @@
 
       function renderLogoArtwork(c, isBump) {
         c.save();
-        // Scale 2x for 2048x2304 ultra-sharp canvas
         c.scale(2, 2);
         const cw = 1024, ch = 1152;
         c.translate(cw * 0.5, ch * 0.44);
 
-        // Ornamental double gold frame border inside the crimson plaque
         c.strokeStyle = isBump ? '#b0b0b0' : 'rgba(255, 224, 130, 0.72)';
         c.lineWidth = 4;
         c.strokeRect(-420, -455, 840, 1020);
@@ -445,7 +533,7 @@
           c.shadowOffsetY = 9;
         }
 
-        // 1. Stylised Ribbon Numeral "5"
+        // Stylised Ribbon Numeral "5"
         c.fillStyle = fillMain;
         c.beginPath();
         c.moveTo(-255, -245);
@@ -466,7 +554,7 @@
         c.closePath();
         c.fill();
 
-        // 2. Flowing Circle / Ribbon "0" with Uplifting Care Silhouette
+        // Flowing Circle / Ribbon "0"
         c.lineWidth = 46;
         c.strokeStyle = fillMain;
         c.beginPath();
@@ -485,13 +573,11 @@
         c.closePath();
         c.fill();
 
-        // 3. Organization Name: "耆康會  SAGE"
         c.fillStyle = fillAccent;
         c.textAlign = 'center';
         c.font = '900 62px "Noto Serif TC", "PingFang HK", "Microsoft JhengHei", sans-serif';
         c.fillText('耆康會  SAGE', 0, 212);
 
-        // Ornamental Gold Divider
         c.strokeStyle = fillMain;
         c.lineWidth = 3;
         c.beginPath();
@@ -499,7 +585,6 @@
         c.lineTo(270, 242);
         c.stroke();
 
-        // 4. 50th Anniversary Motto: "五十載耆康安老  以初心關顧同行"
         c.fillStyle = fillMain;
         c.font = 'bold 34px "Noto Serif TC", "Songti TC", "PingFang HK", serif';
         c.fillText('五十載耆康安老  以初心關顧同行', 0, 294);
@@ -521,36 +606,37 @@
     }
 
     const { roughnessMap: brushedRoughness, normalMap: brushedNormal } = createBrushedMetalMaps();
-    const marbleSlabTex = createLuxuryMarbleTexture();
+    const marbleSlabTex = createDarkObsidianMarbleTexture();
+    const backdropTex = createCeremonialBackdropTexture();
     const { colorTex: plaqueColorTex, bumpTex: plaqueBumpTex } = createSage50PlaqueMaps();
 
     // =========================================================================
-    // 3. 2K REAL-TIME REFLECTIVE MARBLE STAGE, RED CARPET & 24K GOLD INLAYS
+    // 3. CLEAN DARK OBSIDIAN-MARBLE STAGE & 24K GOLD CEREMONIAL RINGS
     // =========================================================================
     const floorGroup = new THREE.Group();
     scene.add(floorGroup);
 
-    const floorMirror = new Reflector(new THREE.PlaneGeometry(96, 46), {
+    const floorMirror = new Reflector(new THREE.PlaneGeometry(90, 44), {
       clipBias: 0.003,
       textureWidth: 2048,
       textureHeight: 2048,
-      color: 0x998e84
+      color: 0x776e66
     });
     floorMirror.rotation.x = -Math.PI / 2;
     floorMirror.position.set(0, -0.002, 2);
     floorGroup.add(floorMirror);
 
     const polishedMarbleDeck = new THREE.Mesh(
-      new THREE.PlaneGeometry(96, 46),
+      new THREE.PlaneGeometry(90, 44),
       new THREE.MeshPhysicalMaterial({
         map: marbleSlabTex,
-        color: 0x2d242c,
+        color: 0x1e181e,
         roughness: 0.14,
         metalness: 0.25,
         clearcoat: 1.0,
         clearcoatRoughness: 0.06,
         transparent: true,
-        opacity: 0.74
+        opacity: 0.78
       })
     );
     polishedMarbleDeck.rotation.x = -Math.PI / 2;
@@ -558,202 +644,86 @@
     polishedMarbleDeck.receiveShadow = true;
     floorGroup.add(polishedMarbleDeck);
 
-    // Ceremonial Imperial Red Carpet Runner Leading to the Cauldron
-    const carpetMat = new THREE.MeshStandardMaterial({
-      color: 0x8f0d12,
-      roughness: 0.78,
-      metalness: 0.08
-    });
-    const carpetRunner = new THREE.Mesh(new THREE.PlaneGeometry(7.2, 22), carpetMat);
-    carpetRunner.rotation.x = -Math.PI / 2;
-    carpetRunner.position.set(0, 0.003, 5.5);
-    carpetRunner.receiveShadow = true;
-    floorGroup.add(carpetRunner);
-
-    // 24K Gold Carpet Borders & Concentric Ceremonial Stage Rings
+    // Concentric 24K Gold Ceremonial Stage Inlay Rings
     const goldInlayMat = new THREE.MeshStandardMaterial({
       color: 0xf5c869,
       metalness: 0.96,
       roughness: 0.15
     });
-    [-3.62, -3.44, 3.44, 3.62].forEach(bx => {
-      const border = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 22), goldInlayMat);
-      border.rotation.x = -Math.PI / 2;
-      border.position.set(bx, 0.004, 5.5);
-      floorGroup.add(border);
-    });
 
-    [2.68, 3.92, 5.15].forEach(radius => {
-      const ring = new THREE.Mesh(new THREE.RingGeometry(radius - 0.038, radius + 0.038, 128), goldInlayMat);
+    [2.68, 3.85, 5.10].forEach(radius => {
+      const ring = new THREE.Mesh(new THREE.RingGeometry(radius - 0.035, radius + 0.035, 128), goldInlayMat);
       ring.rotation.x = -Math.PI / 2;
-      ring.position.set(0, 0.005, 0);
+      ring.position.set(0, 0.004, 0);
       floorGroup.add(ring);
     });
 
     // =========================================================================
-    // 4. FORMAL & PROSPEROUS 3D STADIUM ARCHITECTURE & CEREMONIAL BRAZIERS
+    // 4. CLEAN, DARK & PROSPEROUS CEREMONIAL BACKDROP (Uncluttered & Dignified)
     // =========================================================================
-    const stadiumGroup = new THREE.Group();
-    scene.add(stadiumGroup);
+    const backdropGroup = new THREE.Group();
+    scene.add(backdropGroup);
 
-    // A. Grand Ceremonial Staircase with Central Red Carpet & Gold Step Trim
-    const stairBodyMat = new THREE.MeshStandardMaterial({
-      color: 0x1b1520,
-      roughness: 0.32,
-      metalness: 0.35
-    });
-    const stepLedMat = new THREE.MeshBasicMaterial({ color: 0xffe4a8 });
-
-    const numSteps = 18;
-    for (let s = 0; s < numSteps; s++) {
-      const stepH = 0.22;
-      const stepD = 0.44;
-      const stepW = 58 - s * 0.25;
-      const zPos = -8.8 - s * stepD;
-      const yTop = (s + 1) * stepH;
-
-      const stepMesh = new THREE.Mesh(new THREE.BoxGeometry(stepW, stepH, stepD), stairBodyMat);
-      stepMesh.position.set(0, yTop - stepH / 2, zPos);
-      stepMesh.receiveShadow = true;
-      stadiumGroup.add(stepMesh);
-
-      // Central red carpet runner ascending the grand staircase
-      const stairCarpet = new THREE.Mesh(new THREE.BoxGeometry(7.2, stepH + 0.006, stepD + 0.006), carpetMat);
-      stairCarpet.position.set(0, yTop - stepH / 2, zPos);
-      stadiumGroup.add(stairCarpet);
-
-      // 24K Gold metallic stair nosing + warm concealed step light strip
-      const trim = new THREE.Mesh(new THREE.BoxGeometry(stepW, 0.024, 0.032), goldInlayMat);
-      trim.position.set(0, yTop, zPos + stepD / 2);
-      stadiumGroup.add(trim);
-
-      const led = new THREE.Mesh(new THREE.BoxGeometry(stepW * 0.96, 0.012, 0.015), stepLedMat);
-      led.position.set(0, yTop - 0.025, zPos + stepD / 2 + 0.005);
-      stadiumGroup.add(led);
-    }
-
-    // B. Classical Fluted Marble & Gold-Capital Columns + Ceremonial Flame Braziers
-    const columnMarbleMat = new THREE.MeshStandardMaterial({
-      map: marbleSlabTex,
-      color: 0x6e5f68,
-      roughness: 0.24,
-      metalness: 0.22
-    });
-
-    const sideBrazierLights = [];
-    function createCeremonialColumnWithBrazier(xPos, zPos, height) {
-      const colGroup = new THREE.Group();
-
-      // Stepped marble & gold plinth
-      const plinth = new THREE.Mesh(new THREE.BoxGeometry(1.75, 0.45, 1.75), columnMarbleMat);
-      plinth.position.y = 0.225;
-      colGroup.add(plinth);
-
-      const plinthGold = new THREE.Mesh(new THREE.BoxGeometry(1.82, 0.08, 1.82), goldInlayMat);
-      plinthGold.position.y = 0.46;
-      colGroup.add(plinthGold);
-
-      // Fluted cylindrical shaft
-      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.66, height, 36), columnMarbleMat);
-      shaft.position.y = 0.48 + height / 2;
-      colGroup.add(shaft);
-
-      // Ornate gold capital
-      const capY = 0.48 + height;
-      const capital1 = new THREE.Mesh(new THREE.CylinderGeometry(0.84, 0.60, 0.28, 36), goldInlayMat);
-      capital1.position.y = capY + 0.14;
-      colGroup.add(capital1);
-
-      const capital2 = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.16, 1.85), goldInlayMat);
-      capital2.position.y = capY + 0.34;
-      colGroup.add(capital2);
-
-      // Ceremonial Golden Brazier Bowl on Top
-      const brazierPts = [
-        new THREE.Vector2(0.0, 0.0),
-        new THREE.Vector2(0.65, 0.06),
-        new THREE.Vector2(1.05, 0.32),
-        new THREE.Vector2(0.95, 0.34),
-        new THREE.Vector2(0.0, 0.14)
-      ];
-      const brazier = new THREE.Mesh(new THREE.LatheGeometry(brazierPts, 48), goldInlayMat);
-      brazier.position.y = capY + 0.42;
-      colGroup.add(brazier);
-
-      // Glowing golden flame orb inside the brazier
-      const flameOrb = new THREE.Mesh(
-        new THREE.SphereGeometry(0.45, 20, 20),
-        new THREE.MeshBasicMaterial({ color: 0xffaa33, transparent: true, opacity: 0.0 })
-      );
-      flameOrb.scale.set(1.1, 1.65, 1.1);
-      flameOrb.position.y = capY + 0.92;
-      colGroup.add(flameOrb);
-
-      const brazierLight = new THREE.PointLight(0xff8818, 0, 14, 1.4);
-      brazierLight.position.set(xPos, capY + 1.2, zPos + 0.5);
-      stadiumGroup.add(brazierLight);
-      sideBrazierLights.push({ light: brazierLight, orb: flameOrb });
-
-      colGroup.position.set(xPos, 0, zPos);
-      stadiumGroup.add(colGroup);
-    }
-
-    // Symmetric pair of grand ceremonial columns flanking the cauldron & stairs
-    createCeremonialColumnWithBrazier(-8.8, -9.2, 5.2);
-    createCeremonialColumnWithBrazier(8.8, -9.2, 5.2);
-    createCeremonialColumnWithBrazier(-13.8, -12.2, 6.4);
-    createCeremonialColumnWithBrazier(13.8, -12.2, 6.4);
-
-    // C. Curved 3D Gala Amphitheater & Prosperous Golden Audience Lights
-    const stadiumShell = new THREE.Mesh(
-      new THREE.CylinderGeometry(52, 38, 28, 72, 1, true, Math.PI * 0.65, Math.PI * 0.7),
-      new THREE.MeshStandardMaterial({
-        color: 0x130d18,
-        roughness: 0.65,
-        metalness: 0.25,
-        side: THREE.BackSide
-      })
+    const backdropWall = new THREE.Mesh(
+      new THREE.PlaneGeometry(68, 34),
+      new THREE.MeshBasicMaterial({ map: backdropTex, fog: false })
     );
-    stadiumShell.position.set(0, 12.0, -4);
-    stadiumGroup.add(stadiumShell);
+    backdropWall.position.set(0, 9.5, -18);
+    backdropGroup.add(backdropWall);
 
-    const crowdCount = 1400;
-    const crowdGeom = new THREE.SphereGeometry(0.068, 8, 8);
-    const crowdMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const crowdInstances = new THREE.InstancedMesh(crowdGeom, crowdMat, crowdCount);
-    const dummy = new THREE.Object3D();
-    const color = new THREE.Color();
-
-    for (let i = 0; i < crowdCount; i++) {
-      const angle = THREE.MathUtils.lerp(-Math.PI * 0.35, Math.PI * 0.35, Math.random());
-      const tier = Math.random();
-      const radius = 35 + tier * 12;
-      const y = 3.2 + tier * 12.2 + (Math.random() - 0.5) * 0.35;
-      const x = Math.sin(angle) * radius;
-      const z = -Math.cos(angle) * radius - 4;
-
-      dummy.position.set(x, y, z);
-      const s = 0.65 + Math.random() * 1.15;
-      dummy.scale.set(s, s, s);
-      dummy.updateMatrix();
-      crowdInstances.setMatrixAt(i, dummy.matrix);
-
-      // Rich prosperous golden-amber & warm champagne audience lights
-      if (Math.random() > 0.22) {
-        color.setHSL(0.10 + Math.random() * 0.04, 0.90, 0.72 + Math.random() * 0.25);
-      } else {
-        color.setHSL(0.55 + Math.random() * 0.05, 0.75, 0.80 + Math.random() * 0.18);
-      }
-      crowdInstances.setColorAt(i, color);
+    // Subtle, Clean Golden Ceremonial Spotlights Framing the Cauldron
+    const beamMeshes = [];
+    function createCeremonialBeam(x, y, z, targetX, targetY, targetZ, beamRadius, beamLength, opacity) {
+      const coneGeom = new THREE.ConeGeometry(beamRadius, beamLength, 40, 1, true);
+      coneGeom.translate(0, -beamLength / 2, 0);
+      const coneMat = new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide,
+        uniforms: {
+          uColor: { value: new THREE.Color(0xffe09e) },
+          uOpacity: { value: opacity }
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          varying vec3 vNormal;
+          varying vec3 vViewPos;
+          void main() {
+            vUv = uv;
+            vNormal = normalize(normalMatrix * normal);
+            vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+            vViewPos = -mvPos.xyz;
+            gl_Position = projectionMatrix * mvPos;
+          }
+        `,
+        fragmentShader: `
+          uniform vec3 uColor;
+          uniform float uOpacity;
+          varying vec2 vUv;
+          varying vec3 vNormal;
+          varying vec3 vViewPos;
+          void main() {
+            vec3 viewDir = normalize(vViewPos);
+            float edgeFade = pow(abs(dot(vNormal, viewDir)), 1.9);
+            float verticalFade = smoothstep(0.0, 0.78, vUv.y) * smoothstep(1.0, 0.88, vUv.y);
+            gl_FragColor = vec4(uColor, edgeFade * verticalFade * uOpacity);
+          }
+        `
+      });
+      const cone = new THREE.Mesh(coneGeom, coneMat);
+      cone.position.set(x, y, z);
+      cone.lookAt(targetX, targetY, targetZ);
+      cone.rotateX(Math.PI / 2);
+      backdropGroup.add(cone);
+      beamMeshes.push({ cone, baseRotZ: cone.rotation.z, phase: Math.random() * Math.PI * 2 });
     }
-    crowdInstances.instanceMatrix.needsUpdate = true;
-    if (crowdInstances.instanceColor) crowdInstances.instanceColor.needsUpdate = true;
-    stadiumGroup.add(crowdInstances);
 
-    const trussMat = new THREE.MeshStandardMaterial({ color: 0x241d29, metalness: 0.88, roughness: 0.25 });
-    const trussBeam = new THREE.Mesh(new THREE.BoxGeometry(62, 0.48, 0.65), trussMat);
-    trussBeam.position.set(0, 15.4, -24);
-    stadiumGroup.add(trussBeam);
+    // Just 4 symmetrical, dignified golden beams framing the cauldron
+    createCeremonialBeam(-11.5, 15.5, -14, -2.5, 1.0, -2, 3.4, 24, 0.13);
+    createCeremonialBeam(11.5, 15.5, -14, 2.5, 1.0, -2, 3.4, 24, 0.13);
+    createCeremonialBeam(-6.5, 15.5, -12, 0.0, 2.5, 0, 3.8, 22, 0.14);
+    createCeremonialBeam(6.5, 15.5, -12, 0.0, 2.5, 0, 3.8, 22, 0.14);
 
     // --- Post-Processing Bloom ---
     const composer = new EffectComposer(renderer);
@@ -761,9 +731,9 @@
 
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      0.68,
-      0.50,
-      0.82
+      0.66,
+      0.48,
+      0.83
     );
     composer.addPass(bloomPass);
 
@@ -855,7 +825,7 @@
       () => {}
     );
 
-    // 1. Stepped Circular Cast-Bronze Pedestal Base (96 radial segments)
+    // 1. Stepped Circular Cast-Bronze Pedestal Base
     const baseLowerDisc = new THREE.Mesh(new THREE.CylinderGeometry(2.08, 2.16, 0.14, 96), castBronzeBaseMat);
     baseLowerDisc.position.set(0, 0.07, 0);
     baseLowerDisc.castShadow = true;
@@ -1054,81 +1024,12 @@
     }
 
     // =========================================================================
-    // 6. GOLDEN & CRYSTAL STADIUM SEARCHLIGHTS + PROSPEROUS GALA LIGHTING
+    // 6. CEREMONIAL LIGHTING
     // =========================================================================
-    const beamMeshes = [];
-    const fixtureMat = new THREE.MeshBasicMaterial({ color: 0xfff8e6 });
-
-    function createSearchlight(x, y, z, targetX, targetY, targetZ, beamRadius, beamLength, opacity, colorHex = 0xffe4ad) {
-      const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), fixtureMat);
-      lamp.position.set(x, y, z);
-      scene.add(lamp);
-
-      const coneGeom = new THREE.ConeGeometry(beamRadius, beamLength, 40, 1, true);
-      coneGeom.translate(0, -beamLength / 2, 0);
-      const coneMat = new THREE.ShaderMaterial({
-        transparent: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-        side: THREE.DoubleSide,
-        uniforms: {
-          uColor: { value: new THREE.Color(colorHex) },
-          uOpacity: { value: opacity }
-        },
-        vertexShader: `
-          varying vec2 vUv;
-          varying vec3 vNormal;
-          varying vec3 vViewPos;
-          void main() {
-            vUv = uv;
-            vNormal = normalize(normalMatrix * normal);
-            vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
-            vViewPos = -mvPos.xyz;
-            gl_Position = projectionMatrix * mvPos;
-          }
-        `,
-        fragmentShader: `
-          uniform vec3 uColor;
-          uniform float uOpacity;
-          varying vec2 vUv;
-          varying vec3 vNormal;
-          varying vec3 vViewPos;
-          void main() {
-            vec3 viewDir = normalize(vViewPos);
-            float edgeFade = pow(abs(dot(vNormal, viewDir)), 1.75);
-            float verticalFade = smoothstep(0.0, 0.78, vUv.y) * smoothstep(1.0, 0.88, vUv.y);
-            gl_FragColor = vec4(uColor, edgeFade * verticalFade * uOpacity);
-          }
-        `
-      });
-      const cone = new THREE.Mesh(coneGeom, coneMat);
-      cone.position.set(x, y, z);
-      cone.lookAt(targetX, targetY, targetZ);
-      cone.rotateX(Math.PI / 2);
-      scene.add(cone);
-      beamMeshes.push({ cone, baseRotZ: cone.rotation.z, phase: Math.random() * Math.PI * 2 });
-    }
-
-    // Warm champagne-gold & crystal-white gala searchlight beams
-    createSearchlight(-19.5, 15.0, -23.5, -11.5, 1.0, -14, 2.5, 24, 0.14, 0xffe4ad);
-    createSearchlight(-17.2, 15.0, -23.5, -7.2, 1.5, -12, 2.3, 24, 0.14, 0xd8f0ff);
-    createSearchlight(-11.5, 15.0, -23.5, -17.5, 1.2, -14, 2.3, 23, 0.13, 0xffe4ad);
-    createSearchlight(-9.2, 15.0, -23.5, -3.2, 2.0, -10, 2.6, 24, 0.13, 0xd8f0ff);
-
-    createSearchlight(2.0, 15.0, -23.5, -6.5, 1.0, -10, 3.1, 25, 0.15, 0xffe4ad);
-    createSearchlight(7.5, 15.0, -23.5, -1.2, 1.5, -8, 2.9, 25, 0.16, 0xd8f0ff);
-    createSearchlight(11.0, 15.0, -23.5, 2.4, 1.8, -6, 2.9, 25, 0.16, 0xffe4ad);
-    createSearchlight(13.8, 15.0, -23.5, 6.2, 1.2, -6, 2.7, 25, 0.15, 0xd8f0ff);
-    createSearchlight(16.6, 15.0, -23.5, 10.2, 1.0, -8, 2.7, 25, 0.14, 0xffe4ad);
-    createSearchlight(19.4, 15.0, -23.5, 14.5, 1.0, -10, 2.7, 25, 0.14, 0xd8f0ff);
-
-    createSearchlight(-16.0, 0.4, -14, -7.8, 13.5, -21, 2.2, 21, 0.16, 0xffe4ad);
-    createSearchlight(16.0, 0.4, -14, 7.8, 13.5, -21, 2.2, 21, 0.16, 0xffe4ad);
-
-    const hemiLight = new THREE.HemisphereLight(0xfff0d6, 0x472826, 1.25);
+    const hemiLight = new THREE.HemisphereLight(0xffeed0, 0x3b1e1c, 1.25);
     scene.add(hemiLight);
 
-    const frontKeyLight = new THREE.DirectionalLight(0xfff6e8, 2.45);
+    const frontKeyLight = new THREE.DirectionalLight(0xfff6e8, 2.5);
     frontKeyLight.position.set(4.5, 11.5, 13.0);
     frontKeyLight.castShadow = true;
     frontKeyLight.shadow.mapSize.set(2048, 2048);
@@ -1138,7 +1039,7 @@
     leftRimLight.position.set(-10, 9, 4);
     scene.add(leftRimLight);
 
-    const stageSpot = new THREE.SpotLight(0xfff2d6, 70, 40, Math.PI / 4.6, 0.65, 1.0);
+    const stageSpot = new THREE.SpotLight(0xfff2d6, 72, 40, Math.PI / 4.6, 0.65, 1.0);
     stageSpot.position.set(0, 13, 6);
     stageSpot.target.position.set(0, 0, 0);
     scene.add(stageSpot);
@@ -1250,7 +1151,7 @@
     firePlane3.rotation.y = -0.24;
     cauldronGroup.add(firePlane3);
 
-    // 3D Rising Sparks & Prosperous Golden Dust Motes
+    // 3D Rising Sparks
     const sparkCount = 320;
     const sparkGeom = new THREE.BufferGeometry();
     const sparkPos = new Float32Array(sparkCount * 3);
@@ -1279,21 +1180,21 @@
     const sparkPoints = new THREE.Points(sparkGeom, sparkMat);
     cauldronGroup.add(sparkPoints);
 
-    // Ambient floating golden celebration dust in the stadium air
-    const ambientDustCount = 180;
+    // Subtle floating golden celebration dust motes
+    const ambientDustCount = 150;
     const dustGeom = new THREE.BufferGeometry();
     const dustPos = new Float32Array(ambientDustCount * 3);
     for (let i = 0; i < ambientDustCount; i++) {
-      dustPos[i * 3] = (Math.random() - 0.5) * 26;
+      dustPos[i * 3] = (Math.random() - 0.5) * 24;
       dustPos[i * 3 + 1] = Math.random() * 11;
-      dustPos[i * 3 + 2] = (Math.random() - 0.5) * 18 - 4;
+      dustPos[i * 3 + 2] = (Math.random() - 0.5) * 14 - 3;
     }
     dustGeom.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
     const dustMat = new THREE.PointsMaterial({
       color: 0xffe082,
-      size: 0.065,
+      size: 0.06,
       transparent: true,
-      opacity: 0.45,
+      opacity: 0.42,
       blending: THREE.AdditiveBlending,
       depthWrite: false
     });
@@ -1315,13 +1216,13 @@
       const visibleWidthAtZero = visibleHeightAtZero * camera.aspect;
 
       const scaleY = (visibleHeightAtZero * 0.50) / 4.90;
-      const scaleX = Math.max(scaleY, (visibleWidthAtZero * 0.56) / 9.12);
+      const scaleX = Math.max(scaleY, (visibleWidthAtZero * 0.54) / 9.12);
 
       cauldronGroup.scale.set(scaleX, scaleY, scaleY);
       const baseY = 3.35 - (visibleHeightAtZero * 0.45);
       cauldronGroup.position.y = baseY;
       floorGroup.position.y = baseY;
-      stadiumGroup.position.y = baseY;
+      backdropGroup.position.y = baseY;
     }
     window.addEventListener('resize', updateFraming);
     updateFraming();
@@ -1337,9 +1238,11 @@
       const heatNorm = heatValue / 100;
 
       if (heatValue >= 95) {
-        sloganBanner.classList.add('visible');
+        scrollLeft.classList.add('visible');
+        scrollRight.classList.add('visible');
       } else {
-        sloganBanner.classList.remove('visible');
+        scrollLeft.classList.remove('visible');
+        scrollRight.classList.remove('visible');
       }
 
       fireUniforms.uTime.value = elapsed;
@@ -1347,14 +1250,6 @@
 
       const flicker = Math.sin(elapsed * 21.0) * 0.14 + Math.cos(elapsed * 33.0) * 0.09;
       fireLight.intensity = heatNorm > 0.01 ? (heatNorm * 56 + flicker * 9 * heatNorm) : 0;
-
-      // Synchronize ceremonial side braziers with the main cauldron fire
-      sideBrazierLights.forEach((b, idx) => {
-        const bFlicker = Math.sin(elapsed * 18.0 + idx) * 0.15;
-        b.light.intensity = heatNorm > 0.05 ? (heatNorm * 18 + bFlicker * 4 * heatNorm) : 0;
-        b.orb.material.opacity = Math.min(0.9, heatNorm * 1.1);
-        b.orb.scale.set(1.1 + bFlicker * 0.1, 1.65 + bFlicker * 0.25, 1.1);
-      });
 
       sparkMat.opacity = Math.min(0.95, heatNorm * 1.15);
       const posArr = sparkGeom.attributes.position.array;
@@ -1374,17 +1269,16 @@
       }
       sparkGeom.attributes.position.needsUpdate = true;
 
-      // Gentle upward drift for golden celebration dust
       const dArr = dustGeom.attributes.position.array;
       for (let i = 0; i < ambientDustCount; i++) {
-        dArr[i * 3 + 1] += 0.006;
-        dArr[i * 3] += Math.sin(elapsed * 0.6 + i) * 0.003;
+        dArr[i * 3 + 1] += 0.005;
+        dArr[i * 3] += Math.sin(elapsed * 0.6 + i) * 0.0025;
         if (dArr[i * 3 + 1] > 11) dArr[i * 3 + 1] = 0.2;
       }
       dustGeom.attributes.position.needsUpdate = true;
 
       beamMeshes.forEach((b) => {
-        b.cone.rotation.z = b.baseRotZ + Math.sin(elapsed * 0.35 + b.phase) * 0.025;
+        b.cone.rotation.z = b.baseRotZ + Math.sin(elapsed * 0.3 + b.phase) * 0.02;
       });
 
       composer.render();
