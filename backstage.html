@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Backstage Controller - 50th Anniversary Ceremony</title>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #110b0b;
+      color: #f3e9e9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .panel {
+      width: 100%;
+      max-width: 520px;
+      background: #1b1111;
+      border: 1px solid rgba(255, 215, 0, 0.35);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.85);
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      font-size: 1.15rem;
+      color: #ffd700;
+      letter-spacing: 0.05em;
+    }
+    .live-badge {
+      background: #3a1212;
+      border: 1px solid #ff4500;
+      color: #ff7b54;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .card {
+      background: #140c0c;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+      color: #cbb8b8;
+    }
+    .percentage {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #ffd700;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 14px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #2c1515 0%, #ff4500 70%, #ffd700 100%);
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #fff;
+      border: 4px solid #ff4500;
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
+    }
+    .cue-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    button {
+      background: #271515;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      color: #fff;
+      padding: 14px 12px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    button:hover { background: #3b1c1c; }
+    button.active {
+      background: linear-gradient(135deg, #d93800, #ff6a00);
+      border-color: #ffd700;
+      box-shadow: 0 0 15px rgba(255, 69, 0, 0.5);
+    }
+    button.climax {
+      grid-column: span 2;
+      background: linear-gradient(135deg, #8b0000, #c81d11);
+      border-color: #ffd700;
+      color: #fff7d6;
+      font-size: 1.05rem;
+    }
+    button.climax.active {
+      background: linear-gradient(135deg, #d49b00, #ff4500);
+    }
+    .connect-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    input[type="text"] {
+      flex: 1;
+      background: #0d0707;
+      border: 1px solid #442b2b;
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    .status-note {
+      font-size: 0.8rem;
+      color: #9e8a8a;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="panel">
+    <div class="header">
+      <h1>🔥 BACKSTAGE CONSOLE</h1>
+      <span class="live-badge" id="sync-status">LOCAL SYNC READY</span>
+    </div>
+
+    <!-- Fire Intensity Fader -->
+    <div class="card">
+      <div class="label-row">
+        <span>Flame Intensity</span>
+        <span class="percentage" id="heat-display">0%</span>
+      </div>
+      <input type="range" id="heat-slider" min="0" max="100" value="0">
+    </div>
+
+    <!-- Ceremony Cue Buttons -->
+    <div class="card">
+      <div class="label-row"><span>Ceremony Cues (or press Spacebar)</span></div>
+      <div class="cue-grid">
+        <button class="active" data-heat="0">0% &bull; Extinguished</button>
+        <button data-heat="25">25% &bull; First Spark</button>
+        <button data-heat="60">60% &bull; Rising Flame</button>
+        <button data-heat="85">85% &bull; High Blaze</button>
+        <button class="climax" data-heat="100">100% &bull; CLIMAX (Slogan + Closing Music)</button>
+      </div>
+    </div>
+
+    <!-- Audio & Display Controls -->
+    <div class="card">
+      <div class="label-row"><span>Manual Overrides</span></div>
+      <div class="cue-grid">
+        <button id="btn-play-music">▶ Force Music On</button>
+        <button id="btn-stop-music">⏹ Mute Music</button>
+        <button id="btn-hide-badge" style="grid-column: span 2;">Hide Setup Box on Stage Screen</button>
+      </div>
+    </div>
+
+    <!-- Optional Second-Device Pairing -->
+    <div class="card" style="margin-bottom: 0;">
+      <div class="label-row"><span>Control From Another Device (Optional)</span></div>
+      <div class="connect-row">
+        <input type="text" id="remote-code-input" placeholder="Enter 4-digit ID from Stage Screen">
+        <button id="btn-connect-remote" style="padding: 10px 18px;">Connect</button>
+      </div>
+      <div class="status-note" id="remote-status">
+        If both tabs are on the same laptop, they sync automatically without entering a code.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const slider = document.getElementById('heat-slider');
+    const heatDisplay = document.getElementById('heat-display');
+    const cueButtons = document.querySelectorAll('[data-heat]');
+    const channel = new BroadcastChannel('cauldron_ceremony_sync');
+
+    let remoteConn = null;
+    let currentHeat = 0;
+
+    function broadcastState(payload) {
+      // 1. Same-computer sync
+      channel.postMessage(payload);
+      localStorage.setItem('cauldron_state', JSON.stringify({ ...payload, ts: Date.now() }));
+
+      // 2. Second-device Wi-Fi sync
+      if (remoteConn && remoteConn.open) {
+        remoteConn.send(payload);
+      }
+    }
+
+    function setHeat(val) {
+      currentHeat = Math.max(0, Math.min(100, parseInt(val, 10)));
+      slider.value = currentHeat;
+      heatDisplay.textContent = currentHeat + '%';
+
+      cueButtons.forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.heat, 10) === currentHeat);
+      });
+
+      broadcastState({ heat: currentHeat });
+    }
+
+    slider.addEventListener('input', (e) => setHeat(e.target.value));
+
+    cueButtons.forEach(btn => {
+      btn.addEventListener('click', () => setHeat(btn.dataset.heat));
+    });
+
+    document.getElementById('btn-play-music').addEventListener('click', () => {
+      broadcastState({ audio: 'play' });
+    });
+
+    document.getElementById('btn-stop-music').addEventListener('click', () => {
+      broadcastState({ audio: 'stop' });
+    });
+
+    document.getElementById('btn-hide-badge').addEventListener('click', () => {
+      broadcastState({ hideBadge: true });
+    });
+
+    // Keyboard shortcuts on Backstage Laptop
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT') return;
+      if (e.key === ' ') {
+        e.preventDefault();
+        const steps = [0, 25, 60, 85, 100];
+        const next = steps.find(s => s > currentHeat) ?? 0;
+        setHeat(next);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setHeat(currentHeat + 5);
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setHeat(currentHeat - 5);
+      }
+    });
+
+    // Remote PeerJS Connection for controlling from a separate phone/iPad
+    const peer = new Peer();
+    document.getElementById('btn-connect-remote').addEventListener('click', () => {
+      const code = document.getElementById('remote-code-input').value.trim();
+      if (!code) return;
+      document.getElementById('remote-status').textContent = 'Connecting to stage screen...';
+
+      remoteConn = peer.connect('cauldron-' + code);
+      remoteConn.on('open', () => {
+        document.getElementById('sync-status').textContent = 'REMOTE CONNECTED';
+        document.getElementById('sync-status').style.borderColor = '#4caf50';
+        document.getElementById('sync-status').style.color = '#81c784';
+        document.getElementById('remote-status').textContent = 'Connected! Sending live controls to stage.';
+        remoteConn.send({ heat: currentHeat, hideBadge: true });
+      });
+      remoteConn.on('error', () => {
+        document.getElementById('remote-status').textContent = 'Connection failed. Check the 4-digit code.';
+      });
+    });
+  </script>
+</body>
+</html>
