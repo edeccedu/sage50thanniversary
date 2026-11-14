@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stage Display - 50th Anniversary Olympic Ceremonial Cauldron</title>
+  <title>Stage Display - 50th Anniversary Ceremonial Cauldron</title>
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: #0e141f;
+      background-color: #0b1019;
       color: #fff;
       font-family: 'Noto Serif TC', 'Songti TC', 'PMingLiU', 'PingFang HK', serif;
       overflow: hidden;
@@ -25,7 +25,16 @@
       z-index: 1;
     }
 
-    /* Grand Ceremonial Slogan Reveal Overlay */
+    /* Subtle photographic lens vignette */
+    .lens-vignette {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 52%, transparent 62%, rgba(4, 7, 12, 0.52) 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Ceremonial Slogan Reveal Overlay */
     .banner-container {
       position: fixed;
       top: 4.5vh;
@@ -113,6 +122,7 @@
   </div>
 
   <div id="webgl-container"></div>
+  <div class="lens-vignette"></div>
 
   <!-- Ceremonial Slogan Reveal -->
   <div class="banner-container" id="ceremony-slogan">
@@ -214,38 +224,42 @@
     const container = document.getElementById('webgl-container');
     const scene = new THREE.Scene();
 
-    const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 140);
-    camera.position.set(0, 3.6, 15.2);
-    camera.lookAt(0, 3.2, 0);
+    // Slightly telephoto broadcast camera lens (30 deg FOV) for natural photographic compression
+    const camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.1, 150);
+    camera.position.set(0, 3.65, 17.8);
+    camera.lookAt(0, 3.25, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
+    renderer.toneMappingExposure = 1.18;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
 
-    // --- Reflection Environment Map ---
+    // --- High-Dynamic-Range Arena Reflection Map (Critical for Realistic Metal Speculars) ---
     function buildArenaEnvironment() {
       const pmrem = new THREE.PMREMGenerator(renderer);
       const envScene = new THREE.Scene();
 
+      // Dark neutral-cool arena dome so metallic reflections have high contrast
       const dome = new THREE.Mesh(
-        new THREE.SphereGeometry(40, 32, 16),
-        new THREE.MeshBasicMaterial({ color: 0x262c3a, side: THREE.BackSide })
+        new THREE.SphereGeometry(45, 32, 16),
+        new THREE.MeshBasicMaterial({ color: 0x161c26, side: THREE.BackSide })
       );
       envScene.add(dome);
 
-      const panels = [
-        { pos: [-14, 16, 12], color: 0xd8f3ff, size: [9, 5] },
-        { pos: [14, 16, 12], color: 0xd8f3ff, size: [9, 5] },
-        { pos: [0, 22, 8], color: 0xffe4c4, size: [14, 6] },
-        { pos: [-16, 8, 8], color: 0xff9b54, size: [6, 12] },
-        { pos: [16, 8, 8], color: 0xff9b54, size: [6, 12] }
+      // Sharp high-intensity light strips for realistic brushed metal & bronze specular streaks
+      const lightStrips = [
+        { pos: [-12, 16, 12], color: 0xe6f7ff, size: [5, 12] },
+        { pos: [12, 16, 12], color: 0xe6f7ff, size: [5, 12] },
+        { pos: [0, 22, 6], color: 0xffe8c8, size: [16, 4] },
+        { pos: [-15, 6, 6], color: 0xff8c42, size: [3, 16] },
+        { pos: [15, 6, 6], color: 0xff8c42, size: [3, 16] },
+        { pos: [0, -10, 10], color: 0x6d7d8c, size: [24, 10] } // floor bounce
       ];
-      panels.forEach(p => {
+      lightStrips.forEach(p => {
         const panel = new THREE.Mesh(
           new THREE.PlaneGeometry(p.size[0], p.size[1]),
           new THREE.MeshBasicMaterial({ color: p.color })
@@ -255,61 +269,105 @@
         envScene.add(panel);
       });
 
-      const envRT = pmrem.fromScene(envScene, 0.04);
+      const envRT = pmrem.fromScene(envScene, 0.025);
       scene.environment = envRT.texture;
       pmrem.dispose();
     }
     buildArenaEnvironment();
 
-    // --- Stadium Backdrop ---
+    // --- Procedural Micro-Grain Surface Texture (Eliminates Smooth Plastic Look) ---
+    function createMicroGrainTexture(baseVal = 128, variance = 28, streakY = false) {
+      const size = 512;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const imgData = ctx.createImageData(size, size);
+      const data = imgData.data;
+
+      for (let y = 0; y < size; y++) {
+        const rowBias = streakY ? 0 : (Math.random() - 0.5) * variance * 0.6;
+        for (let x = 0; x < size; x++) {
+          const colBias = streakY ? (Math.random() - 0.5) * variance * 0.75 : 0;
+          const grain = (Math.random() - 0.5) * variance + rowBias + colBias;
+          const v = Math.max(0, Math.min(255, baseVal + grain));
+          const idx = (y * size + x) * 4;
+          data[idx] = v;
+          data[idx + 1] = v;
+          data[idx + 2] = v;
+          data[idx + 3] = 255;
+        }
+      }
+      ctx.putImageData(imgData, 0, 0);
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(3, 3);
+      return tex;
+    }
+
+    const brushedMetalRoughness = createMicroGrainTexture(110, 42, true);
+    const powderCoatRoughness = createMicroGrainTexture(165, 30, false);
+
+    // --- Photographic Stadium Background ---
     function createStadiumBackdropTexture() {
       const c = document.createElement('canvas');
-      c.width = 1024;
-      c.height = 512;
+      c.width = 1600;
+      c.height = 900;
       const ctx = c.getContext('2d');
 
-      const roofGrad = ctx.createLinearGradient(0, 0, 0, 175);
-      roofGrad.addColorStop(0.0, '#4a2518');
-      roofGrad.addColorStop(0.65, '#3b1d14');
-      roofGrad.addColorStop(1.0, '#141923');
+      // 1. Out-of-focus warm amber-terracotta upper roof canopy (top 28%)
+      const roofGrad = ctx.createLinearGradient(0, 0, 0, 265);
+      roofGrad.addColorStop(0.0, '#4f2819');
+      roofGrad.addColorStop(0.55, '#3a1c12');
+      roofGrad.addColorStop(0.92, '#1a1210');
+      roofGrad.addColorStop(1.0, '#0d121a');
       ctx.fillStyle = roofGrad;
-      ctx.fillRect(0, 0, 1024, 175);
+      ctx.fillRect(0, 0, 1600, 265);
 
-      ctx.strokeStyle = 'rgba(255, 195, 145, 0.07)';
-      ctx.lineWidth = 3;
-      for (let x = -200; x < 1224; x += 48) {
+      // Soft architectural roof trusses
+      ctx.strokeStyle = 'rgba(255, 190, 140, 0.06)';
+      ctx.lineWidth = 6;
+      for (let x = -200; x < 1800; x += 72) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
-        ctx.lineTo(x + 90, 165);
+        ctx.lineTo(x + 130, 250);
         ctx.stroke();
       }
 
-      const wallGrad = ctx.createLinearGradient(0, 165, 0, 512);
-      wallGrad.addColorStop(0.0, '#101622');
-      wallGrad.addColorStop(0.45, '#162030');
-      wallGrad.addColorStop(1.0, '#1d2838');
+      // 2. Deep Navy-Slate Arena Seating Tiers
+      const wallGrad = ctx.createLinearGradient(0, 255, 0, 900);
+      wallGrad.addColorStop(0.0, '#0d121b');
+      wallGrad.addColorStop(0.45, '#131c29');
+      wallGrad.addColorStop(1.0, '#192434');
       ctx.fillStyle = wallGrad;
-      ctx.fillRect(0, 165, 1024, 347);
+      ctx.fillRect(0, 255, 1600, 645);
 
-      const blueWash = ctx.createRadialGradient(512, 340, 30, 512, 340, 420);
-      blueWash.addColorStop(0, 'rgba(90, 145, 195, 0.24)');
-      blueWash.addColorStop(1, 'rgba(16, 22, 34, 0)');
-      ctx.fillStyle = blueWash;
-      ctx.fillRect(0, 165, 1024, 347);
+      // Subtle photographic bokeh & depth-of-field haze behind the cauldron
+      const centerHaze = ctx.createRadialGradient(800, 560, 40, 800, 560, 620);
+      centerHaze.addColorStop(0, 'rgba(95, 145, 190, 0.22)');
+      centerHaze.addColorStop(1, 'rgba(13, 18, 27, 0)');
+      ctx.fillStyle = centerHaze;
+      ctx.fillRect(0, 255, 1600, 645);
 
-      for (let y = 265; y <= 495; y += 16) {
-        ctx.fillStyle = 'rgba(10, 15, 24, 0.55)';
-        ctx.fillRect(0, y, 1024, 4);
-        ctx.fillStyle = 'rgba(130, 165, 200, 0.14)';
-        ctx.fillRect(0, y + 4, 1024, 2);
+      // Horizontal tiered seating step ledges with soft edge highlights
+      for (let y = 410; y <= 880; y += 24) {
+        ctx.fillStyle = 'rgba(7, 11, 18, 0.62)';
+        ctx.fillRect(0, y, 1600, 6);
+        ctx.fillStyle = 'rgba(120, 155, 190, 0.13)';
+        ctx.fillRect(0, y + 6, 1600, 2);
       }
 
-      for (let i = 0; i < 45; i++) {
-        const dx = 180 + Math.random() * 664;
-        const dy = 215 + Math.random() * 55;
-        ctx.fillStyle = 'rgba(120, 190, 255, 0.35)';
+      // Soft out-of-focus blue bokeh dots in upper stadium tier
+      for (let i = 0; i < 40; i++) {
+        const dx = 300 + Math.random() * 1000;
+        const dy = 320 + Math.random() * 85;
+        const grad = ctx.createRadialGradient(dx, dy, 0, dx, dy, 5);
+        grad.addColorStop(0, 'rgba(110, 185, 255, 0.35)');
+        grad.addColorStop(1, 'rgba(110, 185, 255, 0)');
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.arc(dx, dy, 1.8, 0, Math.PI * 2);
+        ctx.arc(dx, dy, 5, 0, Math.PI * 2);
         ctx.fill();
       }
 
@@ -319,18 +377,20 @@
     }
 
     const backdropPlane = new THREE.Mesh(
-      new THREE.PlaneGeometry(52, 27),
+      new THREE.PlaneGeometry(56, 31.5),
       new THREE.MeshBasicMaterial({ map: createStadiumBackdropTexture() })
     );
-    backdropPlane.position.set(0, 7.2, -14);
+    backdropPlane.position.set(0, 7.6, -16);
     scene.add(backdropPlane);
 
+    // Light-Grey Textured Arena Floor
     const arenaFloor = new THREE.Mesh(
-      new THREE.PlaneGeometry(60, 28),
+      new THREE.PlaneGeometry(64, 32),
       new THREE.MeshStandardMaterial({
-        color: 0x7d8a96,
-        roughness: 0.65,
-        metalness: 0.15
+        color: 0x7b8894,
+        roughness: 0.72,
+        roughnessMap: powderCoatRoughness,
+        metalness: 0.08
       })
     );
     arenaFloor.rotation.x = -Math.PI / 2;
@@ -344,149 +404,69 @@
 
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      0.72,
-      0.52,
-      0.80
+      0.65,
+      0.48,
+      0.84
     );
     composer.addPass(bloomPass);
 
-    // --- Procedural Textures ---
-    function createBowlTextures() {
-      const w = 2048, h = 512;
-      const colorCanvas = document.createElement('canvas');
-      colorCanvas.width = w; colorCanvas.height = h;
-      const cCtx = colorCanvas.getContext('2d');
-
-      const bumpCanvas = document.createElement('canvas');
-      bumpCanvas.width = w; bumpCanvas.height = h;
-      const bCtx = bumpCanvas.getContext('2d');
-
-      const grad = cCtx.createLinearGradient(0, 0, 0, h);
-      grad.addColorStop(0, '#b82518');
-      grad.addColorStop(0.5, '#9e1910');
-      grad.addColorStop(1, '#6e0d08');
-      cCtx.fillStyle = grad;
-      cCtx.fillRect(0, 0, w, h);
-
-      bCtx.fillStyle = '#303030';
-      bCtx.fillRect(0, 0, w, h);
-
-      cCtx.fillStyle = '#f5c767';
-      cCtx.fillRect(0, 0, w, 16);
-      bCtx.fillStyle = '#ffffff';
-      bCtx.fillRect(0, 0, w, 16);
-
-      const cols = 18;
-      const stepX = w / cols;
-
-      function drawSpiralMotif(ctx, x, y, r, flip, isBump) {
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.scale(flip, 1);
-        ctx.strokeStyle = isBump ? '#ffffff' : '#f7cb68';
-        ctx.lineCap = 'round';
-        ctx.lineWidth = isBump ? 16 : 12;
-
-        ctx.beginPath();
-        for (let a = 0; a < Math.PI * 4.2; a += 0.15) {
-          const rad = (a / (Math.PI * 4.2)) * r;
-          const px = Math.cos(a) * rad;
-          const py = Math.sin(a) * rad;
-          if (a === 0) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
-        }
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(r, 0);
-        ctx.bezierCurveTo(r * 1.25, -r * 0.55, r * 1.55, r * 0.55, r * 1.85, 0);
-        ctx.stroke();
-        ctx.restore();
-      }
-
-      for (let i = 0; i < cols; i++) {
-        const cx = i * stepX + stepX * 0.5;
-        drawSpiralMotif(cCtx, cx, h * 0.36, 48, i % 2 === 0 ? 1 : -1, false);
-        drawSpiralMotif(bCtx, cx, h * 0.36, 48, i % 2 === 0 ? 1 : -1, true);
-
-        drawSpiralMotif(cCtx, cx + stepX * 0.5, h * 0.74, 34, i % 2 === 0 ? -1 : 1, false);
-        drawSpiralMotif(bCtx, cx + stepX * 0.5, h * 0.74, 34, i % 2 === 0 ? -1 : 1, true);
-      }
-
-      const colorTex = new THREE.CanvasTexture(colorCanvas);
-      colorTex.wrapS = THREE.RepeatWrapping;
-      colorTex.colorSpace = THREE.SRGBColorSpace;
-
-      const bumpTex = new THREE.CanvasTexture(bumpCanvas);
-      bumpTex.wrapS = THREE.RepeatWrapping;
-
-      return { colorTex, bumpTex };
-    }
-
-    // Clean Solid Matte Vermilion-Red Plaque Texture (No text, badge, or rings)
-    function createPlaqueTexture() {
-      const canvas = document.createElement('canvas');
-      canvas.width = 512;
-      canvas.height = 1024;
-      const ctx = canvas.getContext('2d');
-
-      const grad = ctx.createLinearGradient(0, 0, 0, 1024);
-      grad.addColorStop(0, '#cc1b18');
-      grad.addColorStop(0.5, '#ba1614');
-      grad.addColorStop(1, '#9c110f');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 512, 1024);
-
-      const tex = new THREE.CanvasTexture(canvas);
-      tex.colorSpace = THREE.SRGBColorSpace;
-      return tex;
-    }
-
-    // --- Build Cauldron ---
+    // =========================================================================
+    // BUILD PHOTOREALISTIC 3D CAULDRON WITH TRUE EXTRUDED METALWORK
+    // =========================================================================
     const cauldronGroup = new THREE.Group();
     scene.add(cauldronGroup);
 
-    const { colorTex, bumpTex } = createBowlTextures();
-    const bowlMat = new THREE.MeshStandardMaterial({
-      map: colorTex,
-      bumpMap: bumpTex,
-      bumpScale: 0.11,
-      metalness: 0.78,
-      roughness: 0.25,
+    // Realistic PBR Materials
+    const darkCopperBowlMat = new THREE.MeshStandardMaterial({
+      color: 0x6b110a,
+      metalness: 0.86,
+      roughness: 0.32,
+      roughnessMap: brushedMetalRoughness,
       side: THREE.DoubleSide
     });
 
-    const goldMat = new THREE.MeshStandardMaterial({
-      color: 0xf5c453,
-      metalness: 0.9,
-      roughness: 0.22
+    const sculptedGoldBronzeMat = new THREE.MeshStandardMaterial({
+      color: 0xe3b154,
+      metalness: 0.94,
+      roughness: 0.22,
+      roughnessMap: brushedMetalRoughness
     });
 
-    const pillarMat = new THREE.MeshStandardMaterial({
-      color: 0x3b4048,
-      metalness: 0.72,
-      roughness: 0.35
+    const anodizedPillarMat = new THREE.MeshStandardMaterial({
+      color: 0x383d45,
+      metalness: 0.82,
+      roughness: 0.34,
+      roughnessMap: brushedMetalRoughness
     });
 
+    // Clean Matte Vermilion-Red Powder-Coated Shield Material (No text or logo)
+    const vermilionShieldMat = new THREE.MeshStandardMaterial({
+      color: 0xc21915,
+      metalness: 0.06,
+      roughness: 0.62,
+      roughnessMap: powderCoatRoughness
+    });
+
+    // 1. Two Tall Angled Anodized Gunmetal Pillars
     function createPillar(side) {
       const shape = new THREE.Shape();
-      shape.moveTo(-0.36, 0);
-      shape.lineTo(0.36, 0);
-      shape.lineTo(0.54, 3.85);
-      shape.lineTo(-0.32, 3.85);
+      shape.moveTo(-0.35, 0);
+      shape.lineTo(0.35, 0);
+      shape.lineTo(0.53, 3.86);
+      shape.lineTo(-0.31, 3.86);
       shape.closePath();
 
       const geom = new THREE.ExtrudeGeometry(shape, {
-        depth: 0.78,
+        depth: 0.82,
         bevelEnabled: true,
-        bevelThickness: 0.03,
-        bevelSize: 0.03,
-        bevelSegments: 2
+        bevelThickness: 0.025,
+        bevelSize: 0.025,
+        bevelSegments: 3
       });
       geom.center();
 
-      const mesh = new THREE.Mesh(geom, pillarMat);
-      mesh.position.set(side * 1.48, 1.925, 0);
+      const mesh = new THREE.Mesh(geom, anodizedPillarMat);
+      mesh.position.set(side * 1.46, 1.93, 0);
       mesh.scale.x = side;
       mesh.castShadow = true;
       mesh.receiveShadow = true;
@@ -495,85 +475,178 @@
     cauldronGroup.add(createPillar(-1));
     cauldronGroup.add(createPillar(1));
 
-    const leftEdgeLight = new THREE.PointLight(0xff7b29, 14, 9, 1.5);
-    leftEdgeLight.position.set(-2.6, 1.8, 1.2);
+    // Warm orange-amber rim bounce lights on the outer edges of the pillars
+    const leftEdgeLight = new THREE.PointLight(0xff7426, 16, 8.5, 1.6);
+    leftEdgeLight.position.set(-2.55, 1.85, 1.15);
     cauldronGroup.add(leftEdgeLight);
 
-    const rightEdgeLight = new THREE.PointLight(0xff7b29, 14, 9, 1.5);
-    rightEdgeLight.position.set(2.6, 1.8, 1.2);
+    const rightEdgeLight = new THREE.PointLight(0xff7426, 16, 8.5, 1.6);
+    rightEdgeLight.position.set(2.55, 1.85, 1.15);
     cauldronGroup.add(rightEdgeLight);
 
-    const neckCylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.46, 0.72, 24), goldMat);
-    neckCylinder.position.set(0, 3.68, 0);
-    cauldronGroup.add(neckCylinder);
+    // 2. Exposed Brass-Gold Mechanical Burner Assembly Under the Bowl
+    const burnerCore = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.54, 0.44, 0.72, 28),
+      sculptedGoldBronzeMat
+    );
+    burnerCore.position.set(0, 3.68, 0);
+    cauldronGroup.add(burnerCore);
 
-    [-0.32, -0.1, 0.1, 0.32].forEach(px => {
-      const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.82, 12), goldMat);
-      pipe.position.set(px, 3.66, 0.46);
+    // Detailed mechanical rings & vertical gas manifold pipes
+    [3.50, 3.74].forEach(ry => {
+      const collar = new THREE.Mesh(
+        new THREE.TorusGeometry(0.55, 0.035, 12, 32),
+        sculptedGoldBronzeMat
+      );
+      collar.rotation.x = Math.PI / 2;
+      collar.position.set(0, ry, 0);
+      cauldronGroup.add(collar);
+    });
+
+    [-0.32, -0.11, 0.11, 0.32].forEach(px => {
+      const pipe = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.042, 0.042, 0.84, 14),
+        sculptedGoldBronzeMat
+      );
+      pipe.position.set(px, 3.66, 0.48);
       cauldronGroup.add(pipe);
     });
 
-    const plaqueTex = createPlaqueTexture();
-    const plaqueMat = new THREE.MeshStandardMaterial({
-      map: plaqueTex,
-      metalness: 0.08,
-      roughness: 0.58
+    // 3. Clean Matte Vermilion-Red Trapezoidal Plaque (No text/emblem)
+    const shieldShape = new THREE.Shape();
+    shieldShape.moveTo(-0.92, -1.28);
+    shieldShape.lineTo(0.92, -1.28);
+    shieldShape.lineTo(1.16, 1.28);
+    shieldShape.lineTo(-1.16, 1.28);
+    shieldShape.closePath();
+
+    const shieldGeom = new THREE.ExtrudeGeometry(shieldShape, {
+      depth: 0.14,
+      bevelEnabled: true,
+      bevelThickness: 0.015,
+      bevelSize: 0.015,
+      bevelSegments: 2
     });
+    shieldGeom.center();
 
-    const plaqueGeom = new THREE.CylinderGeometry(1.18, 0.90, 2.55, 4);
-    plaqueGeom.rotateY(Math.PI / 4);
-    plaqueGeom.scale(1.18, 1.0, 0.22);
-
-    const posAttr = plaqueGeom.attributes.position;
-    const uvAttr = plaqueGeom.attributes.uv;
-    for (let i = 0; i < posAttr.count; i++) {
-      const x = posAttr.getX(i);
-      const y = posAttr.getY(i);
-      uvAttr.setXY(i, (x / 2.2) + 0.5, (y / 2.55) + 0.5);
-    }
-
-    const plaqueMesh = new THREE.Mesh(plaqueGeom, plaqueMat);
-    plaqueMesh.position.set(0, 2.15, 0.38);
+    const plaqueMesh = new THREE.Mesh(shieldGeom, vermilionShieldMat);
+    plaqueMesh.position.set(0, 2.15, 0.42);
     plaqueMesh.castShadow = true;
+    plaqueMesh.receiveShadow = true;
     cauldronGroup.add(plaqueMesh);
 
+    // 4. Inner Dark-Copper Bowl Shell
     const bowlPoints = [
       new THREE.Vector2(0.0, 0.0),
       new THREE.Vector2(1.4, 0.04),
-      new THREE.Vector2(2.75, 0.26),
-      new THREE.Vector2(3.85, 0.68),
-      new THREE.Vector2(4.42, 1.08),
-      new THREE.Vector2(4.24, 1.10),
-      new THREE.Vector2(3.50, 0.72),
-      new THREE.Vector2(0.0, 0.48)
+      new THREE.Vector2(2.75, 0.25),
+      new THREE.Vector2(3.85, 0.66),
+      new THREE.Vector2(4.42, 1.06),
+      new THREE.Vector2(4.26, 1.08),
+      new THREE.Vector2(3.50, 0.70),
+      new THREE.Vector2(0.0, 0.46)
     ];
-    const bowlGeom = new THREE.LatheGeometry(bowlPoints, 80);
-    const bowlMesh = new THREE.Mesh(bowlGeom, bowlMat);
+    const bowlGeom = new THREE.LatheGeometry(bowlPoints, 96);
+    const bowlMesh = new THREE.Mesh(bowlGeom, darkCopperBowlMat);
     bowlMesh.position.set(0, 3.76, 0);
     bowlMesh.castShadow = true;
     bowlMesh.receiveShadow = true;
     cauldronGroup.add(bowlMesh);
 
-    // --- Stadium Floodlight Fixtures & Beams ---
+    // 5. TRUE 3D SCULPTED GOLD CLOUD-SCROLL FILIGREE CAGE AROUND THE BOWL
+    // Builds physical 3D metallic spiral tubes hugging the exact curvature of the bowl
+    const filigreeGroup = new THREE.Group();
+    filigreeGroup.position.set(0, 3.76, 0);
+    cauldronGroup.add(filigreeGroup);
+
+    // Top & Bottom Structural Rim Rings
+    const topRim = new THREE.Mesh(new THREE.TorusGeometry(4.36, 0.048, 16, 120), sculptedGoldBronzeMat);
+    topRim.rotation.x = Math.PI / 2;
+    topRim.position.y = 1.06;
+    filigreeGroup.add(topRim);
+
+    const midRib = new THREE.Mesh(new THREE.TorusGeometry(3.58, 0.028, 12, 100), sculptedGoldBronzeMat);
+    midRib.rotation.x = Math.PI / 2;
+    midRib.position.y = 0.56;
+    filigreeGroup.add(midRib);
+
+    const lowRim = new THREE.Mesh(new THREE.TorusGeometry(2.35, 0.035, 12, 90), sculptedGoldBronzeMat);
+    lowRim.rotation.x = Math.PI / 2;
+    lowRim.position.y = 0.19;
+    filigreeGroup.add(lowRim);
+
+    // Helper to project (theta, heightRatio) onto the outer bowl surface with slight outward relief
+    function bowlSurfacePoint(theta, t, relief = 0.045) {
+      // Interpolate radius & y along the outer bowl curve
+      const r = 1.4 + t * 3.04 + relief;
+      const y = 0.04 + Math.pow(t, 1.48) * 1.01;
+      return new THREE.Vector3(Math.sin(theta) * r, y, Math.cos(theta) * r);
+    }
+
+    // Generate 24 interlocking 3D spiral cloud scrolls all the way around the bowl
+    const numSpirals = 24;
+    for (let i = 0; i < numSpirals; i++) {
+      const baseTheta = (i / numSpirals) * Math.PI * 2;
+      const dir = i % 2 === 0 ? 1 : -1;
+
+      // Upper large 3D spiral scroll
+      const ptsUpper = [];
+      const turns = 2.15;
+      const steps = 42;
+      for (let s = 0; s <= steps; s++) {
+        const frac = s / steps;
+        const angle = frac * Math.PI * 2 * turns;
+        const spiralRad = frac * 0.115;
+        const theta = baseTheta + Math.cos(angle) * spiralRad * dir;
+        const t = 0.68 + Math.sin(angle) * 0.24 * frac;
+        ptsUpper.push(bowlSurfacePoint(theta, Math.max(0.15, Math.min(0.96, t)), 0.045));
+      }
+      const upperCurve = new THREE.CatmullRomCurve3(ptsUpper);
+      const upperTube = new THREE.Mesh(
+        new THREE.TubeGeometry(upperCurve, 36, 0.032, 8, false),
+        sculptedGoldBronzeMat
+      );
+      filigreeGroup.add(upperTube);
+
+      // Lower nested 3D spiral scroll
+      const ptsLower = [];
+      const lowBaseTheta = baseTheta + (Math.PI / numSpirals);
+      for (let s = 0; s <= 32; s++) {
+        const frac = s / 32;
+        const angle = frac * Math.PI * 2 * 1.85;
+        const spiralRad = frac * 0.085;
+        const theta = lowBaseTheta - Math.cos(angle) * spiralRad * dir;
+        const t = 0.34 + Math.sin(angle) * 0.17 * frac;
+        ptsLower.push(bowlSurfacePoint(theta, Math.max(0.10, Math.min(0.62, t)), 0.042));
+      }
+      const lowerCurve = new THREE.CatmullRomCurve3(ptsLower);
+      const lowerTube = new THREE.Mesh(
+        new THREE.TubeGeometry(lowerCurve, 28, 0.026, 8, false),
+        sculptedGoldBronzeMat
+      );
+      filigreeGroup.add(lowerTube);
+    }
+
+    // --- Stadium Floodlight Fixtures & Diagonal Cyan-White Beams ---
     const beamMeshes = [];
-    const fixtureMat = new THREE.MeshBasicMaterial({ color: 0xe8fbff });
+    const fixtureMat = new THREE.MeshBasicMaterial({ color: 0xeafcff });
 
     function createStadiumFloodlight(x, y, z, targetX, targetY, beamRadius, beamLength, opacity) {
       const housing = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.42, 0.36, 0.45, 20),
-        new THREE.MeshStandardMaterial({ color: 0x1a222d, metalness: 0.8, roughness: 0.3 })
+        new THREE.CylinderGeometry(0.42, 0.36, 0.45, 24),
+        new THREE.MeshStandardMaterial({ color: 0x161d26, metalness: 0.85, roughness: 0.28 })
       );
       housing.position.set(x, y, z);
       housing.lookAt(targetX, targetY, 0);
       housing.rotateX(Math.PI / 2);
       scene.add(housing);
 
-      const lens = new THREE.Mesh(new THREE.CircleGeometry(0.36, 20), fixtureMat);
+      const lens = new THREE.Mesh(new THREE.CircleGeometry(0.36, 24), fixtureMat);
       lens.position.set(x, y, z + 0.23);
       lens.lookAt(targetX, targetY, 0);
       scene.add(lens);
 
-      const coneGeom = new THREE.ConeGeometry(beamRadius, beamLength, 32, 1, true);
+      const coneGeom = new THREE.ConeGeometry(beamRadius, beamLength, 36, 1, true);
       coneGeom.translate(0, -beamLength / 2, 0);
       const coneMat = new THREE.ShaderMaterial({
         transparent: true,
@@ -604,8 +677,8 @@
           varying vec3 vViewPos;
           void main() {
             vec3 viewDir = normalize(vViewPos);
-            float edgeFade = pow(abs(dot(vNormal, viewDir)), 1.55);
-            float verticalFade = smoothstep(0.0, 0.78, vUv.y) * smoothstep(1.0, 0.85, vUv.y);
+            float edgeFade = pow(abs(dot(vNormal, viewDir)), 1.6);
+            float verticalFade = smoothstep(0.0, 0.78, vUv.y) * smoothstep(1.0, 0.86, vUv.y);
             gl_FragColor = vec4(uColor, edgeFade * verticalFade * uOpacity);
           }
         `
@@ -618,30 +691,33 @@
       beamMeshes.push({ cone, baseRotZ: cone.rotation.z, phase: Math.random() * Math.PI * 2 });
     }
 
-    createStadiumFloodlight(-7.6, 8.8, -11.5, -13.5, 4.8, 2.6, 14, 0.24);
-    createStadiumFloodlight(-0.6, 7.6, -11.8, -6.5, 4.2, 2.3, 13, 0.22);
-    createStadiumFloodlight(7.2, 8.8, -11.5, 1.2, 4.4, 2.8, 15, 0.26);
-    createStadiumFloodlight(10.2, 5.4, -10.5, 3.8, 1.2, 2.7, 13, 0.28);
+    createStadiumFloodlight(-8.4, 9.4, -13.0, -14.8, 5.2, 2.8, 15, 0.23);
+    createStadiumFloodlight(-0.6, 8.1, -13.2, -7.2, 4.5, 2.4, 14, 0.21);
+    createStadiumFloodlight(7.8, 9.4, -13.0, 1.4, 4.6, 3.0, 16, 0.25);
+    createStadiumFloodlight(11.2, 5.8, -12.0, 4.2, 1.2, 2.9, 14, 0.27);
 
-    const hemiLight = new THREE.HemisphereLight(0xdceeff, 0x5c6875, 1.35);
+    // Balanced Photographic Key, Fill & Rim Lighting
+    const hemiLight = new THREE.HemisphereLight(0xd4e8ff, 0x56626e, 1.15);
     scene.add(hemiLight);
 
-    const frontKeyLight = new THREE.DirectionalLight(0xfff5e6, 2.2);
-    frontKeyLight.position.set(2.5, 9.0, 11.0);
+    const frontKeyLight = new THREE.DirectionalLight(0xfff4e4, 2.1);
+    frontKeyLight.position.set(3.2, 9.5, 12.0);
     frontKeyLight.castShadow = true;
     scene.add(frontKeyLight);
 
-    const coolRightSpot = new THREE.SpotLight(0xb8ecff, 35, 30, Math.PI / 5, 0.6, 1.0);
-    coolRightSpot.position.set(9, 7, 4);
+    const coolRightSpot = new THREE.SpotLight(0xb5ebff, 42, 32, Math.PI / 5, 0.65, 1.0);
+    coolRightSpot.position.set(10, 7.5, 4);
     coolRightSpot.target.position.set(1.5, 0.5, 0);
     scene.add(coolRightSpot);
     scene.add(coolRightSpot.target);
 
-    const fireLight = new THREE.PointLight(0xff7b00, 0, 24, 1.3);
-    fireLight.position.set(0, 5.6, 0.8);
+    const fireLight = new THREE.PointLight(0xff8414, 0, 26, 1.25);
+    fireLight.position.set(0, 5.5, 0.85);
     scene.add(fireLight);
 
-    // --- Custom GPU GLSL Volumetric Fire Shader ---
+    // =========================================================================
+    // MULTI-TONGUE PHOTOGRAPHIC FIRE SHADER (Breaks into Separate Flame Licks)
+    // =========================================================================
     const fireUniforms = {
       uTime: { value: 0 },
       uHeat: { value: 0 }
@@ -680,11 +756,11 @@
         }
         float fbm(vec2 p) {
           float v = 0.0;
-          float a = 0.5;
-          for (int i = 0; i < 5; i++) {
+          float a = 0.52;
+          for (int i = 0; i < 6; i++) {
             v += a * noise(p);
-            p *= 2.04;
-            a *= 0.5;
+            p *= 2.12;
+            a *= 0.49;
           }
           return v;
         }
@@ -693,49 +769,54 @@
           if (uHeat <= 0.005) discard;
 
           vec2 uv = vUv;
-          float nx = (uv.x - 0.5) * 2.0;
-          float ny = uv.y;
+          float nx = (uv.x - 0.5) * 2.0; // -1 to 1 across bowl
+          float ny = uv.y;              // 0 at bowl rim to 1 at top
 
-          float maxH = mix(0.08, 0.96, uHeat);
+          float maxH = mix(0.10, 0.96, uHeat);
           float hNorm = ny / maxH;
           if (hNorm > 1.05) discard;
 
-          vec2 flowUv = vec2(nx * 2.8, ny * 3.8 - uTime * 3.4);
-          float n1 = fbm(flowUv);
-          float n2 = fbm(flowUv * 1.9 + vec2(uTime * 0.7, -uTime * 2.1));
-          float turb = mix(n1, n2, 0.45);
+          // Domain-warped high-frequency turbulence to create distinct sharp flame tongues
+          vec2 warpUv = vec2(nx * 5.2, ny * 3.4 - uTime * 3.8);
+          float warp = fbm(warpUv);
+          vec2 detailUv = vec2((nx + (warp - 0.5) * 0.38) * 7.5, ny * 5.2 - uTime * 4.8);
+          float tongues = fbm(detailUv);
 
-          float baseSpread = mix(0.24, 0.88, sqrt(uHeat));
-          float taper = mix(baseSpread, 0.04, pow(clamp(hNorm, 0.0, 1.0), 0.85));
-          float distFromCenter = abs(nx + (turb - 0.5) * 0.42 * hNorm);
+          // Combine broad flame envelope with sharp individual vertical licks
+          float spread = mix(0.28, 0.86, sqrt(uHeat));
+          float bowlEnvelope = smoothstep(spread, spread * 0.25, abs(nx));
+          float heightCarve = tongues * 1.18 - pow(hNorm, 0.78) * 0.92;
 
-          float shape = smoothstep(taper, taper * 0.15, distFromCenter);
-          float verticalMask = smoothstep(0.0, 0.09, ny) * smoothstep(1.02, 0.25, hNorm);
+          // Base embers bed inside the bowl rim
+          float baseBed = smoothstep(0.18, 0.0, ny) * bowlEnvelope * 0.85;
+          float flameBody = smoothstep(0.04, 0.36, heightCarve) * bowlEnvelope * smoothstep(0.0, 0.06, ny);
 
-          float intensity = shape * verticalMask * (0.65 + 0.75 * turb);
-          intensity = smoothstep(0.18, 0.88, intensity) * smoothstep(0.0, 0.12, uHeat);
+          float intensity = max(baseBed, flameBody) * smoothstep(0.0, 0.10, uHeat);
+          if (intensity <= 0.01) discard;
 
-          vec3 col = mix(vec3(0.92, 0.16, 0.0), vec3(1.0, 0.52, 0.04), smoothstep(0.15, 0.48, intensity));
-          col = mix(col, vec3(1.0, 0.88, 0.30), smoothstep(0.45, 0.75, intensity));
-          col = mix(col, vec3(1.0, 0.99, 0.92), smoothstep(0.75, 0.98, intensity));
+          // Realistic natural gas/torch color spectrum (bright yellow-white tongues with warm orange edges)
+          vec3 col = mix(vec3(0.95, 0.28, 0.02), vec3(1.0, 0.65, 0.10), smoothstep(0.12, 0.45, intensity));
+          col = mix(col, vec3(1.0, 0.92, 0.45), smoothstep(0.42, 0.72, intensity));
+          col = mix(col, vec3(1.0, 0.99, 0.94), smoothstep(0.70, 0.95, intensity));
 
-          gl_FragColor = vec4(col * 1.45, clamp(intensity * 1.25, 0.0, 1.0));
+          gl_FragColor = vec4(col * 1.38, clamp(intensity * 1.35, 0.0, 1.0));
         }
       `
     });
 
-    const firePlaneGeom = new THREE.PlaneGeometry(8.0, 5.2);
+    const firePlaneGeom = new THREE.PlaneGeometry(8.1, 4.9);
     const firePlane1 = new THREE.Mesh(firePlaneGeom, fireMat);
-    firePlane1.position.set(0, 7.2, 0.05);
+    firePlane1.position.set(0, 7.12, 0.08);
     cauldronGroup.add(firePlane1);
 
     const firePlane2 = new THREE.Mesh(firePlaneGeom, fireMat);
-    firePlane2.position.set(0, 7.2, -0.05);
-    firePlane2.rotation.y = 0.22;
+    firePlane2.position.set(0, 7.12, -0.08);
+    firePlane2.rotation.y = 0.18;
+    firePlane2.scale.x = -1; // mirror second layer so flame tongues never look repetitive
     cauldronGroup.add(firePlane2);
 
-    // --- 3D Rising Golden Sparks ---
-    const sparkCount = 240;
+    // --- 3D Rising Sparks ---
+    const sparkCount = 220;
     const sparkGeom = new THREE.BufferGeometry();
     const sparkPos = new Float32Array(sparkCount * 3);
     const sparkVel = [];
@@ -745,16 +826,16 @@
       sparkPos[i * 3 + 1] = 4.8 + Math.random() * 5.0;
       sparkPos[i * 3 + 2] = (Math.random() - 0.5) * 1.5;
       sparkVel.push({
-        vx: (Math.random() - 0.5) * 0.035,
-        vy: 0.03 + Math.random() * 0.075,
+        vx: (Math.random() - 0.5) * 0.032,
+        vy: 0.03 + Math.random() * 0.07,
         vz: (Math.random() - 0.5) * 0.02
       });
     }
     sparkGeom.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3));
 
     const sparkMat = new THREE.PointsMaterial({
-      color: 0xffd666,
-      size: 0.09,
+      color: 0xffd973,
+      size: 0.08,
       transparent: true,
       opacity: 0,
       blending: THREE.AdditiveBlending,
@@ -763,7 +844,7 @@
     const sparkPoints = new THREE.Points(sparkGeom, sparkMat);
     cauldronGroup.add(sparkPoints);
 
-    // --- Responsive Framing ---
+    // --- Responsive Framing: Cauldron = 1/2 Screen Height, >= 1/2 Screen Width ---
     function updateFraming() {
       const w = window.innerWidth;
       const h = window.innerHeight;
@@ -781,7 +862,7 @@
       const scaleX = Math.max(scaleY, (visibleWidthAtZero * 0.56) / 8.84);
 
       cauldronGroup.scale.set(scaleX, scaleY, scaleY);
-      cauldronGroup.position.y = 3.2 - (visibleHeightAtZero * 0.46);
+      cauldronGroup.position.y = 3.25 - (visibleHeightAtZero * 0.46);
       arenaFloor.position.y = cauldronGroup.position.y;
     }
     window.addEventListener('resize', updateFraming);
@@ -806,13 +887,13 @@
       fireUniforms.uTime.value = elapsed;
       fireUniforms.uHeat.value = heatNorm;
 
-      const flicker = Math.sin(elapsed * 19.0) * 0.14 + Math.cos(elapsed * 31.0) * 0.09;
-      fireLight.intensity = heatNorm > 0.01 ? (heatNorm * 40 + flicker * 8 * heatNorm) : 0;
+      const flicker = Math.sin(elapsed * 21.0) * 0.14 + Math.cos(elapsed * 33.0) * 0.09;
+      fireLight.intensity = heatNorm > 0.01 ? (heatNorm * 44 + flicker * 8 * heatNorm) : 0;
 
       sparkMat.opacity = Math.min(0.95, heatNorm * 1.15);
       const posArr = sparkGeom.attributes.position.array;
-      const spread = 3.7 * Math.sqrt(Math.max(0.05, heatNorm));
-      const maxSparkY = 4.85 + heatNorm * 5.2;
+      const spread = 3.6 * Math.sqrt(Math.max(0.05, heatNorm));
+      const maxSparkY = 4.85 + heatNorm * 5.0;
 
       for (let i = 0; i < sparkCount; i++) {
         posArr[i * 3] += sparkVel[i].vx + Math.sin(elapsed * 3 + i) * 0.008;
