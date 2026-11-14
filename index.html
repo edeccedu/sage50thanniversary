@@ -8,7 +8,7 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: #05080f;
+      background-color: #09060c;
       color: #fff;
       font-family: 'Noto Serif TC', 'Songti TC', 'PMingLiU', 'PingFang HK', serif;
       overflow: hidden;
@@ -25,11 +25,11 @@
       z-index: 1;
     }
 
-    /* Subtle Anamorphic Broadcast Vignette */
+    /* Subtle Ceremonial Edge Vignette */
     .cinema-vignette {
       position: fixed;
       inset: 0;
-      background: radial-gradient(circle at 50% 50%, transparent 62%, rgba(2, 4, 9, 0.58) 100%);
+      background: radial-gradient(circle at 50% 50%, transparent 64%, rgba(6, 2, 5, 0.52) 100%);
       pointer-events: none;
       z-index: 2;
     }
@@ -37,7 +37,7 @@
     /* Grand Ceremonial Slogan Reveal Overlay */
     .banner-container {
       position: fixed;
-      top: 4.5vh;
+      top: 4.2vh;
       left: 0;
       width: 100%;
       z-index: 6;
@@ -58,15 +58,15 @@
     .laurel {
       height: 14.5vh;
       min-height: 92px;
-      filter: drop-shadow(0 0 18px rgba(255, 205, 75, 0.9));
+      filter: drop-shadow(0 0 20px rgba(255, 205, 75, 0.95));
     }
 
     .slogan-plaque {
-      background: linear-gradient(180deg, rgba(28, 6, 8, 0.90) 0%, rgba(12, 3, 5, 0.94) 100%);
-      border-top: 2px solid rgba(255, 224, 125, 0.92);
-      border-bottom: 2px solid rgba(255, 224, 125, 0.92);
-      padding: 1.6vh 4.2vw;
-      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.82), inset 0 0 32px rgba(255, 195, 65, 0.22);
+      background: linear-gradient(180deg, rgba(44, 8, 10, 0.92) 0%, rgba(18, 3, 5, 0.96) 100%);
+      border-top: 2.5px solid rgba(255, 224, 125, 0.95);
+      border-bottom: 2.5px solid rgba(255, 224, 125, 0.95);
+      padding: 1.6vh 4.4vw;
+      box-shadow: 0 20px 55px rgba(0, 0, 0, 0.85), inset 0 0 36px rgba(255, 195, 65, 0.28);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -88,8 +88,8 @@
       position: fixed;
       top: 16px;
       left: 16px;
-      background: rgba(10, 15, 25, 0.92);
-      border: 1px solid rgba(255, 215, 0, 0.55);
+      background: rgba(18, 10, 14, 0.92);
+      border: 1px solid rgba(255, 215, 0, 0.6);
       color: #ffd700;
       padding: 12px 16px;
       border-radius: 8px;
@@ -221,47 +221,55 @@
       document.getElementById('peer-id-display').textContent = 'Local Mode';
     }
 
-    // --- Three.js Scene, Camera & Renderer ---
+    // --- Three.js Ultra-HD Scene, Camera & Renderer ---
     const container = document.getElementById('webgl-container');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x060a12);
-    scene.fog = new THREE.FogExp2(0x080e1a, 0.0105);
+    scene.background = new THREE.Color(0x0b0812);
+    scene.fog = new THREE.FogExp2(0x100b18, 0.0095);
 
-    const camera = new THREE.PerspectiveCamera(33, window.innerWidth / window.innerHeight, 0.1, 220);
+    const camera = new THREE.PerspectiveCamera(33, window.innerWidth / window.innerHeight, 0.1, 240);
     camera.position.set(0, 3.85, 17.8);
     camera.lookAt(0, 3.35, 0);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      powerPreference: 'high-performance',
+      precision: 'highp'
+    });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Unlock crisp 4K / Retina pixel density up to 3.0x
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.24;
+    renderer.toneMappingExposure = 1.26;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
 
+    const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
+
     // =========================================================================
-    // 1. STUDIO-GRADE HDRI REFLECTION MAP (Sharp Speculars on Gold & Titanium)
+    // 1. GRAND CEREMONIAL GALA ENVIRONMENT MAP (Warm Gold & Cool Starlight)
     // =========================================================================
-    function buildLuxuryArenaEnvironment() {
+    function buildProsperousGalaEnvironment() {
       const pmrem = new THREE.PMREMGenerator(renderer);
       const envScene = new THREE.Scene();
 
+      // Deep imperial burgundy-navy gala dome
       const dome = new THREE.Mesh(
-        new THREE.SphereGeometry(60, 32, 16),
-        new THREE.MeshBasicMaterial({ color: 0x0e1420, side: THREE.BackSide })
+        new THREE.SphereGeometry(60, 48, 24),
+        new THREE.MeshBasicMaterial({ color: 0x1c1118, side: THREE.BackSide })
       );
       envScene.add(dome);
 
-      // Softboxes & stadium searchlight strips for rich anisotropic metal reflections
+      // Warm golden chandelier light banks + crisp white broadcast softboxes
       const softboxes = [
-        { pos: [-16, 20, 14], color: 0xeaf8ff, size: [6, 18] },
-        { pos: [16, 20, 14], color: 0xeaf8ff, size: [6, 18] },
-        { pos: [-6, 26, 8], color: 0xffffff, size: [8, 12] },
-        { pos: [6, 26, 8], color: 0xfff2dc, size: [8, 12] },
-        { pos: [-16, 5, 10], color: 0xff9a4d, size: [4, 16] },
-        { pos: [16, 5, 10], color: 0xff9a4d, size: [4, 16] },
-        { pos: [0, -12, 10], color: 0x3a2e28, size: [36, 18] }
+        { pos: [-16, 22, 14], color: 0xfff3db, size: [7, 20] },
+        { pos: [16, 22, 14], color: 0xfff3db, size: [7, 20] },
+        { pos: [-6, 26, 8], color: 0xffffff, size: [9, 12] },
+        { pos: [6, 26, 8], color: 0xffe8bd, size: [9, 12] },
+        { pos: [-16, 5, 10], color: 0xffa64d, size: [5, 18] },
+        { pos: [16, 5, 10], color: 0xffa64d, size: [5, 18] },
+        { pos: [0, -12, 10], color: 0x5c2420, size: [36, 18] }
       ];
       softboxes.forEach(sb => {
         const panel = new THREE.Mesh(
@@ -273,17 +281,17 @@
         envScene.add(panel);
       });
 
-      const envRT = pmrem.fromScene(envScene, 0.02);
+      const envRT = pmrem.fromScene(envScene, 0.018);
       scene.environment = envRT.texture;
       pmrem.dispose();
     }
-    buildLuxuryArenaEnvironment();
+    buildProsperousGalaEnvironment();
 
     // =========================================================================
-    // 2. PROCEDURAL PBR TEXTURES (Brushed Metal, Normal Maps, Veined Marble)
+    // 2. HIGH-RESOLUTION PROCEDURAL PBR TEXTURES (1024px - 2048px)
     // =========================================================================
     function createBrushedMetalMaps() {
-      const size = 512;
+      const size = 1024;
       const roughCanvas = document.createElement('canvas');
       roughCanvas.width = size; roughCanvas.height = size;
       const rCtx = roughCanvas.getContext('2d');
@@ -297,9 +305,9 @@
       const heights = new Float32Array(size * size);
       for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
-          const streak = Math.sin(x * 0.45 + Math.sin(y * 0.05) * 2.0) * 0.5 + (Math.random() - 0.5) * 0.7;
+          const streak = Math.sin(x * 0.55 + Math.sin(y * 0.04) * 2.0) * 0.5 + (Math.random() - 0.5) * 0.65;
           heights[y * size + x] = streak;
-          const rVal = Math.max(40, Math.min(220, 95 + streak * 32));
+          const rVal = Math.max(38, Math.min(215, 92 + streak * 30));
           const idx = (y * size + x) * 4;
           rImg.data[idx] = rVal;
           rImg.data[idx + 1] = rVal;
@@ -309,7 +317,6 @@
       }
       rCtx.putImageData(rImg, 0, 0);
 
-      // Compute tangent-space normal map from heightfield
       for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
           const xL = (x - 1 + size) % size;
@@ -332,44 +339,46 @@
       const roughnessMap = new THREE.CanvasTexture(roughCanvas);
       roughnessMap.wrapS = roughnessMap.wrapT = THREE.RepeatWrapping;
       roughnessMap.repeat.set(4, 4);
+      roughnessMap.anisotropy = maxAnisotropy;
 
       const normalMap = new THREE.CanvasTexture(normCanvas);
       normalMap.wrapS = normalMap.wrapT = THREE.RepeatWrapping;
       normalMap.repeat.set(4, 4);
+      normalMap.anisotropy = maxAnisotropy;
 
       return { roughnessMap, normalMap };
     }
 
     function createLuxuryMarbleTexture() {
-      const size = 1024;
+      const size = 2048;
       const canvas = document.createElement('canvas');
       canvas.width = size; canvas.height = size;
       const ctx = canvas.getContext('2d');
 
-      // Deep obsidian-charcoal stone base
-      ctx.fillStyle = '#181d26';
+      // Deep imperial obsidian-burgundy stone base
+      ctx.fillStyle = '#1b1620';
       ctx.fillRect(0, 0, size, size);
 
-      // Subtle warm bronze-gold & slate marble veining
-      for (let v = 0; v < 26; v++) {
+      // Rich gold & warm ivory marble veining
+      for (let v = 0; v < 42; v++) {
         ctx.beginPath();
         let px = Math.random() * size;
         let py = Math.random() * size;
         ctx.moveTo(px, py);
-        for (let step = 0; step < 18; step++) {
-          px += (Math.random() - 0.35) * 90;
-          py += (Math.random() - 0.35) * 90;
+        for (let step = 0; step < 24; step++) {
+          px += (Math.random() - 0.35) * 140;
+          py += (Math.random() - 0.35) * 140;
           ctx.lineTo(px, py);
         }
-        ctx.strokeStyle = v % 3 === 0 ? 'rgba(215, 175, 110, 0.14)' : 'rgba(130, 155, 185, 0.11)';
-        ctx.lineWidth = Math.random() * 2.5 + 0.6;
+        ctx.strokeStyle = v % 2 === 0 ? 'rgba(235, 190, 110, 0.18)' : 'rgba(210, 175, 165, 0.11)';
+        ctx.lineWidth = Math.random() * 3.2 + 0.8;
         ctx.stroke();
       }
 
-      // Architectural stone slab grid joints
-      ctx.strokeStyle = 'rgba(218, 180, 108, 0.22)';
-      ctx.lineWidth = 2;
-      for (let g = 0; g <= size; g += 256) {
+      // 24K Gold architectural stone slab grid joints
+      ctx.strokeStyle = 'rgba(235, 192, 110, 0.28)';
+      ctx.lineWidth = 3;
+      for (let g = 0; g <= size; g += 512) {
         ctx.beginPath(); ctx.moveTo(g, 0); ctx.lineTo(g, size); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(0, g); ctx.lineTo(size, g); ctx.stroke();
       }
@@ -378,40 +387,170 @@
       tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
       tex.repeat.set(6, 4);
       tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = maxAnisotropy;
       return tex;
+    }
+
+    // =========================================================================
+    // ULTRA-CRISP 2048x2304 SAGE 50TH ANNIVERSARY PLAQUE LOGO (Matches SAGE 50.pdf)
+    // =========================================================================
+    function createSage50PlaqueMaps() {
+      const w = 2048;
+      const h = 2304;
+      const colorCanvas = document.createElement('canvas');
+      colorCanvas.width = w; colorCanvas.height = h;
+      const ctx = colorCanvas.getContext('2d');
+
+      const bumpCanvas = document.createElement('canvas');
+      bumpCanvas.width = w; bumpCanvas.height = h;
+      const bCtx = bumpCanvas.getContext('2d');
+
+      // Deep Piano-Lacquer Imperial Vermilion Base
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+      bgGrad.addColorStop(0, '#cc1814');
+      bgGrad.addColorStop(0.55, '#b5120e');
+      bgGrad.addColorStop(1, '#8f0b08');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, w, h);
+
+      bCtx.fillStyle = '#000000';
+      bCtx.fillRect(0, 0, w, h);
+
+      function renderLogoArtwork(c, isBump) {
+        c.save();
+        // Scale 2x for 2048x2304 ultra-sharp canvas
+        c.scale(2, 2);
+        const cw = 1024, ch = 1152;
+        c.translate(cw * 0.5, ch * 0.44);
+
+        // Ornamental double gold frame border inside the crimson plaque
+        c.strokeStyle = isBump ? '#b0b0b0' : 'rgba(255, 224, 130, 0.72)';
+        c.lineWidth = 4;
+        c.strokeRect(-420, -455, 840, 1020);
+        c.lineWidth = 1.5;
+        c.strokeRect(-406, -441, 812, 992);
+
+        const goldGrad = c.createLinearGradient(-280, -260, 280, 260);
+        goldGrad.addColorStop(0.0, '#fff7cc');
+        goldGrad.addColorStop(0.35, '#f5cc6c');
+        goldGrad.addColorStop(0.7, '#d99c2e');
+        goldGrad.addColorStop(1.0, '#ffeba0');
+
+        const fillMain = isBump ? '#ffffff' : goldGrad;
+        const fillAccent = isBump ? '#dcdcdc' : '#fff8d6';
+
+        if (!isBump) {
+          c.shadowColor = 'rgba(50, 4, 3, 0.58)';
+          c.shadowBlur = 20;
+          c.shadowOffsetY = 9;
+        }
+
+        // 1. Stylised Ribbon Numeral "5"
+        c.fillStyle = fillMain;
+        c.beginPath();
+        c.moveTo(-255, -245);
+        c.quadraticCurveTo(-130, -255, -25, -238);
+        c.lineTo(-42, -182);
+        c.quadraticCurveTo(-135, -196, -205, -188);
+        c.lineTo(-218, -95);
+        c.quadraticCurveTo(-150, -125, -85, -92);
+        c.quadraticCurveTo(-20, -55, -25, 22);
+        c.quadraticCurveTo(-32, 108, -128, 128);
+        c.quadraticCurveTo(-228, 145, -278, 72);
+        c.lineTo(-225, 36);
+        c.quadraticCurveTo(-190, 82, -135, 74);
+        c.quadraticCurveTo(-82, 65, -80, 12);
+        c.quadraticCurveTo(-78, -42, -142, -48);
+        c.quadraticCurveTo(-195, -52, -235, -20);
+        c.lineTo(-268, -32);
+        c.closePath();
+        c.fill();
+
+        // 2. Flowing Circle / Ribbon "0" with Uplifting Care Silhouette
+        c.lineWidth = 46;
+        c.strokeStyle = fillMain;
+        c.beginPath();
+        c.ellipse(135, -55, 118, 168, 0.14, 0.25 * Math.PI, 1.92 * Math.PI);
+        c.stroke();
+
+        c.fillStyle = fillAccent;
+        c.beginPath();
+        c.arc(145, -118, 24, 0, Math.PI * 2);
+        c.fill();
+
+        c.beginPath();
+        c.moveTo(45, -25);
+        c.bezierCurveTo(95, -85, 185, -75, 235, -15);
+        c.bezierCurveTo(185, -35, 105, -35, 55, 15);
+        c.closePath();
+        c.fill();
+
+        // 3. Organization Name: "耆康會  SAGE"
+        c.fillStyle = fillAccent;
+        c.textAlign = 'center';
+        c.font = '900 62px "Noto Serif TC", "PingFang HK", "Microsoft JhengHei", sans-serif';
+        c.fillText('耆康會  SAGE', 0, 212);
+
+        // Ornamental Gold Divider
+        c.strokeStyle = fillMain;
+        c.lineWidth = 3;
+        c.beginPath();
+        c.moveTo(-270, 242);
+        c.lineTo(270, 242);
+        c.stroke();
+
+        // 4. 50th Anniversary Motto: "五十載耆康安老  以初心關顧同行"
+        c.fillStyle = fillMain;
+        c.font = 'bold 34px "Noto Serif TC", "Songti TC", "PingFang HK", serif';
+        c.fillText('五十載耆康安老  以初心關顧同行', 0, 294);
+
+        c.restore();
+      }
+
+      renderLogoArtwork(ctx, false);
+      renderLogoArtwork(bCtx, true);
+
+      const colorTex = new THREE.CanvasTexture(colorCanvas);
+      colorTex.colorSpace = THREE.SRGBColorSpace;
+      colorTex.anisotropy = maxAnisotropy;
+
+      const bumpTex = new THREE.CanvasTexture(bumpCanvas);
+      bumpTex.anisotropy = maxAnisotropy;
+
+      return { colorTex, bumpTex };
     }
 
     const { roughnessMap: brushedRoughness, normalMap: brushedNormal } = createBrushedMetalMaps();
     const marbleSlabTex = createLuxuryMarbleTexture();
+    const { colorTex: plaqueColorTex, bumpTex: plaqueBumpTex } = createSage50PlaqueMaps();
 
     // =========================================================================
-    // 3. REAL-TIME REFLECTIVE MARBLE STAGE FLOOR & GOLD INLAYS
+    // 3. 2K REAL-TIME REFLECTIVE MARBLE STAGE, RED CARPET & 24K GOLD INLAYS
     // =========================================================================
     const floorGroup = new THREE.Group();
     scene.add(floorGroup);
 
-    // Real-time planar mirror reflector beneath a semi-transparent polished marble layer
-    const floorMirror = new Reflector(new THREE.PlaneGeometry(90, 42), {
+    const floorMirror = new Reflector(new THREE.PlaneGeometry(96, 46), {
       clipBias: 0.003,
-      textureWidth: Math.floor(window.innerWidth * 0.75),
-      textureHeight: Math.floor(window.innerHeight * 0.75),
-      color: 0x8899aa
+      textureWidth: 2048,
+      textureHeight: 2048,
+      color: 0x998e84
     });
     floorMirror.rotation.x = -Math.PI / 2;
     floorMirror.position.set(0, -0.002, 2);
     floorGroup.add(floorMirror);
 
     const polishedMarbleDeck = new THREE.Mesh(
-      new THREE.PlaneGeometry(90, 42),
+      new THREE.PlaneGeometry(96, 46),
       new THREE.MeshPhysicalMaterial({
         map: marbleSlabTex,
-        color: 0x2a323e,
-        roughness: 0.16,
+        color: 0x2d242c,
+        roughness: 0.14,
         metalness: 0.25,
         clearcoat: 1.0,
-        clearcoatRoughness: 0.08,
+        clearcoatRoughness: 0.06,
         transparent: true,
-        opacity: 0.76
+        opacity: 0.74
       })
     );
     polishedMarbleDeck.rotation.x = -Math.PI / 2;
@@ -419,123 +558,191 @@
     polishedMarbleDeck.receiveShadow = true;
     floorGroup.add(polishedMarbleDeck);
 
-    // 24K Gold Ceremonial Stage Inlay Rings around the Cauldron Base
-    const goldInlayMat = new THREE.MeshStandardMaterial({
-      color: 0xf0c265,
-      metalness: 0.96,
-      roughness: 0.16
+    // Ceremonial Imperial Red Carpet Runner Leading to the Cauldron
+    const carpetMat = new THREE.MeshStandardMaterial({
+      color: 0x8f0d12,
+      roughness: 0.78,
+      metalness: 0.08
     });
-    [2.65, 3.85].forEach(radius => {
-      const ring = new THREE.Mesh(new THREE.RingGeometry(radius - 0.035, radius + 0.035, 96), goldInlayMat);
+    const carpetRunner = new THREE.Mesh(new THREE.PlaneGeometry(7.2, 22), carpetMat);
+    carpetRunner.rotation.x = -Math.PI / 2;
+    carpetRunner.position.set(0, 0.003, 5.5);
+    carpetRunner.receiveShadow = true;
+    floorGroup.add(carpetRunner);
+
+    // 24K Gold Carpet Borders & Concentric Ceremonial Stage Rings
+    const goldInlayMat = new THREE.MeshStandardMaterial({
+      color: 0xf5c869,
+      metalness: 0.96,
+      roughness: 0.15
+    });
+    [-3.62, -3.44, 3.44, 3.62].forEach(bx => {
+      const border = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 22), goldInlayMat);
+      border.rotation.x = -Math.PI / 2;
+      border.position.set(bx, 0.004, 5.5);
+      floorGroup.add(border);
+    });
+
+    [2.68, 3.92, 5.15].forEach(radius => {
+      const ring = new THREE.Mesh(new THREE.RingGeometry(radius - 0.038, radius + 0.038, 128), goldInlayMat);
       ring.rotation.x = -Math.PI / 2;
-      ring.position.set(0, 0.004, 0);
+      ring.position.set(0, 0.005, 0);
       floorGroup.add(ring);
     });
 
     // =========================================================================
-    // 4. TRUE 3D GRAND OLYMPIC STADIUM ARCHITECTURE
+    // 4. FORMAL & PROSPEROUS 3D STADIUM ARCHITECTURE & CEREMONIAL BRAZIERS
     // =========================================================================
     const stadiumGroup = new THREE.Group();
     scene.add(stadiumGroup);
 
-    // A. Sweeping Grand Ceremonial Staircase with Warm Architectural LED Step Lighting
+    // A. Grand Ceremonial Staircase with Central Red Carpet & Gold Step Trim
     const stairBodyMat = new THREE.MeshStandardMaterial({
-      color: 0x141d2b,
-      roughness: 0.35,
+      color: 0x1b1520,
+      roughness: 0.32,
       metalness: 0.35
     });
-    const stairTrimMat = new THREE.MeshStandardMaterial({
-      color: 0xd9ad5b,
-      metalness: 0.9,
-      roughness: 0.22
-    });
-    const stepLedMat = new THREE.MeshBasicMaterial({ color: 0xffe4b5 });
+    const stepLedMat = new THREE.MeshBasicMaterial({ color: 0xffe4a8 });
 
     const numSteps = 18;
     for (let s = 0; s < numSteps; s++) {
       const stepH = 0.22;
       const stepD = 0.44;
-      const stepW = 54 - s * 0.25;
+      const stepW = 58 - s * 0.25;
       const zPos = -8.8 - s * stepD;
       const yTop = (s + 1) * stepH;
 
       const stepMesh = new THREE.Mesh(new THREE.BoxGeometry(stepW, stepH, stepD), stairBodyMat);
-      stepMesh.position.set(2.5, yTop - stepH / 2, zPos);
+      stepMesh.position.set(0, yTop - stepH / 2, zPos);
       stepMesh.receiveShadow = true;
       stadiumGroup.add(stepMesh);
 
-      // Gold metallic stair nosing + warm concealed step light strip
-      const trim = new THREE.Mesh(new THREE.BoxGeometry(stepW, 0.022, 0.03), stairTrimMat);
-      trim.position.set(2.5, yTop, zPos + stepD / 2);
+      // Central red carpet runner ascending the grand staircase
+      const stairCarpet = new THREE.Mesh(new THREE.BoxGeometry(7.2, stepH + 0.006, stepD + 0.006), carpetMat);
+      stairCarpet.position.set(0, yTop - stepH / 2, zPos);
+      stadiumGroup.add(stairCarpet);
+
+      // 24K Gold metallic stair nosing + warm concealed step light strip
+      const trim = new THREE.Mesh(new THREE.BoxGeometry(stepW, 0.024, 0.032), goldInlayMat);
+      trim.position.set(0, yTop, zPos + stepD / 2);
       stadiumGroup.add(trim);
 
       const led = new THREE.Mesh(new THREE.BoxGeometry(stepW * 0.96, 0.012, 0.015), stepLedMat);
-      led.position.set(2.5, yTop - 0.025, zPos + stepD / 2 + 0.005);
+      led.position.set(0, yTop - 0.025, zPos + stepD / 2 + 0.005);
       stadiumGroup.add(led);
     }
 
-    // B. Fluted Architectural Marble & Bronze Colonnade Piers Flanking the Grand Stairs
+    // B. Classical Fluted Marble & Gold-Capital Columns + Ceremonial Flame Braziers
     const columnMarbleMat = new THREE.MeshStandardMaterial({
       map: marbleSlabTex,
-      color: 0x566475,
-      roughness: 0.28,
-      metalness: 0.2
-    });
-    [
-      { x: -15.5, y: 2.2, z: -10.5, w: 2.4, h: 4.4, d: 1.8 },
-      { x: -10.5, y: 3.4, z: -13.0, w: 2.6, h: 6.8, d: 2.0 },
-      { x: -5.8, y: 4.6, z: -15.5, w: 2.8, h: 9.2, d: 2.2 },
-      { x: 14.5, y: 3.6, z: -13.5, w: 2.8, h: 7.2, d: 2.2 }
-    ].forEach(p => {
-      const pier = new THREE.Mesh(new THREE.BoxGeometry(p.w, p.h, p.d), columnMarbleMat);
-      pier.position.set(p.x, p.y, p.z);
-      stadiumGroup.add(pier);
-
-      const cap = new THREE.Mesh(new THREE.BoxGeometry(p.w + 0.24, 0.16, p.d + 0.24), goldInlayMat);
-      cap.position.set(p.x, p.y + p.h / 2 + 0.08, p.z);
-      stadiumGroup.add(cap);
+      color: 0x6e5f68,
+      roughness: 0.24,
+      metalness: 0.22
     });
 
-    // C. Curved 3D Stadium Bowl Tiers & Twinkling Audience Lights (InstancedMesh for 1,200 crisp lights)
+    const sideBrazierLights = [];
+    function createCeremonialColumnWithBrazier(xPos, zPos, height) {
+      const colGroup = new THREE.Group();
+
+      // Stepped marble & gold plinth
+      const plinth = new THREE.Mesh(new THREE.BoxGeometry(1.75, 0.45, 1.75), columnMarbleMat);
+      plinth.position.y = 0.225;
+      colGroup.add(plinth);
+
+      const plinthGold = new THREE.Mesh(new THREE.BoxGeometry(1.82, 0.08, 1.82), goldInlayMat);
+      plinthGold.position.y = 0.46;
+      colGroup.add(plinthGold);
+
+      // Fluted cylindrical shaft
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.66, height, 36), columnMarbleMat);
+      shaft.position.y = 0.48 + height / 2;
+      colGroup.add(shaft);
+
+      // Ornate gold capital
+      const capY = 0.48 + height;
+      const capital1 = new THREE.Mesh(new THREE.CylinderGeometry(0.84, 0.60, 0.28, 36), goldInlayMat);
+      capital1.position.y = capY + 0.14;
+      colGroup.add(capital1);
+
+      const capital2 = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.16, 1.85), goldInlayMat);
+      capital2.position.y = capY + 0.34;
+      colGroup.add(capital2);
+
+      // Ceremonial Golden Brazier Bowl on Top
+      const brazierPts = [
+        new THREE.Vector2(0.0, 0.0),
+        new THREE.Vector2(0.65, 0.06),
+        new THREE.Vector2(1.05, 0.32),
+        new THREE.Vector2(0.95, 0.34),
+        new THREE.Vector2(0.0, 0.14)
+      ];
+      const brazier = new THREE.Mesh(new THREE.LatheGeometry(brazierPts, 48), goldInlayMat);
+      brazier.position.y = capY + 0.42;
+      colGroup.add(brazier);
+
+      // Glowing golden flame orb inside the brazier
+      const flameOrb = new THREE.Mesh(
+        new THREE.SphereGeometry(0.45, 20, 20),
+        new THREE.MeshBasicMaterial({ color: 0xffaa33, transparent: true, opacity: 0.0 })
+      );
+      flameOrb.scale.set(1.1, 1.65, 1.1);
+      flameOrb.position.y = capY + 0.92;
+      colGroup.add(flameOrb);
+
+      const brazierLight = new THREE.PointLight(0xff8818, 0, 14, 1.4);
+      brazierLight.position.set(xPos, capY + 1.2, zPos + 0.5);
+      stadiumGroup.add(brazierLight);
+      sideBrazierLights.push({ light: brazierLight, orb: flameOrb });
+
+      colGroup.position.set(xPos, 0, zPos);
+      stadiumGroup.add(colGroup);
+    }
+
+    // Symmetric pair of grand ceremonial columns flanking the cauldron & stairs
+    createCeremonialColumnWithBrazier(-8.8, -9.2, 5.2);
+    createCeremonialColumnWithBrazier(8.8, -9.2, 5.2);
+    createCeremonialColumnWithBrazier(-13.8, -12.2, 6.4);
+    createCeremonialColumnWithBrazier(13.8, -12.2, 6.4);
+
+    // C. Curved 3D Gala Amphitheater & Prosperous Golden Audience Lights
     const stadiumShell = new THREE.Mesh(
-      new THREE.CylinderGeometry(48, 36, 26, 64, 1, true, Math.PI * 0.65, Math.PI * 0.7),
+      new THREE.CylinderGeometry(52, 38, 28, 72, 1, true, Math.PI * 0.65, Math.PI * 0.7),
       new THREE.MeshStandardMaterial({
-        color: 0x0a101b,
-        roughness: 0.7,
-        metalness: 0.2,
+        color: 0x130d18,
+        roughness: 0.65,
+        metalness: 0.25,
         side: THREE.BackSide
       })
     );
-    stadiumShell.position.set(0, 11.5, -4);
+    stadiumShell.position.set(0, 12.0, -4);
     stadiumGroup.add(stadiumShell);
 
-    const crowdCount = 1100;
-    const crowdGeom = new THREE.SphereGeometry(0.065, 6, 6);
+    const crowdCount = 1400;
+    const crowdGeom = new THREE.SphereGeometry(0.068, 8, 8);
     const crowdMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const crowdInstances = new THREE.InstancedMesh(crowdGeom, crowdMat, crowdCount);
     const dummy = new THREE.Object3D();
     const color = new THREE.Color();
 
     for (let i = 0; i < crowdCount; i++) {
-      // Place lights across the curved stadium amphitheater tiers
-      const angle = THREE.MathUtils.lerp(-Math.PI * 0.34, Math.PI * 0.34, Math.random());
+      const angle = THREE.MathUtils.lerp(-Math.PI * 0.35, Math.PI * 0.35, Math.random());
       const tier = Math.random();
-      const radius = 34 + tier * 11;
-      const y = 3.2 + tier * 11.5 + (Math.random() - 0.5) * 0.35;
+      const radius = 35 + tier * 12;
+      const y = 3.2 + tier * 12.2 + (Math.random() - 0.5) * 0.35;
       const x = Math.sin(angle) * radius;
       const z = -Math.cos(angle) * radius - 4;
 
       dummy.position.set(x, y, z);
-      const s = 0.6 + Math.random() * 1.1;
+      const s = 0.65 + Math.random() * 1.15;
       dummy.scale.set(s, s, s);
       dummy.updateMatrix();
       crowdInstances.setMatrixAt(i, dummy.matrix);
 
-      // Warm gold & cool starlight audience flashes
-      if (Math.random() > 0.38) {
-        color.setHSL(0.11 + Math.random() * 0.04, 0.85, 0.72 + Math.random() * 0.25);
+      // Rich prosperous golden-amber & warm champagne audience lights
+      if (Math.random() > 0.22) {
+        color.setHSL(0.10 + Math.random() * 0.04, 0.90, 0.72 + Math.random() * 0.25);
       } else {
-        color.setHSL(0.56 + Math.random() * 0.05, 0.80, 0.78 + Math.random() * 0.2);
+        color.setHSL(0.55 + Math.random() * 0.05, 0.75, 0.80 + Math.random() * 0.18);
       }
       crowdInstances.setColorAt(i, color);
     }
@@ -543,10 +750,9 @@
     if (crowdInstances.instanceColor) crowdInstances.instanceColor.needsUpdate = true;
     stadiumGroup.add(crowdInstances);
 
-    // D. Overhead 3D Steel Lighting Catwalk Truss & Spotlight Housings
-    const trussMat = new THREE.MeshStandardMaterial({ color: 0x1a222f, metalness: 0.85, roughness: 0.3 });
-    const trussBeam = new THREE.Mesh(new THREE.BoxGeometry(56, 0.45, 0.6), trussMat);
-    trussBeam.position.set(0, 15.2, -24);
+    const trussMat = new THREE.MeshStandardMaterial({ color: 0x241d29, metalness: 0.88, roughness: 0.25 });
+    const trussBeam = new THREE.Mesh(new THREE.BoxGeometry(62, 0.48, 0.65), trussMat);
+    trussBeam.position.set(0, 15.4, -24);
     stadiumGroup.add(trussBeam);
 
     // --- Post-Processing Bloom ---
@@ -555,86 +761,118 @@
 
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      0.66,
-      0.48,
-      0.83
+      0.68,
+      0.50,
+      0.82
     );
     composer.addPass(bloomPass);
 
     // =========================================================================
-    // 5. MUSEUM-GRADE CAST BRONZE, BRUSHED TITANIUM & LACQUERED CAULDRON
+    // 5. ULTRA-HIGH-POLY 24K GOLD, BRONZE & LACQUERED CRIMSON CAULDRON
     // =========================================================================
     const cauldronGroup = new THREE.Group();
     scene.add(cauldronGroup);
 
-    // High-Class Physical Materials
     const hammeredCopperMat = new THREE.MeshPhysicalMaterial({
-      color: 0x69130b,
-      metalness: 0.90,
-      roughness: 0.26,
+      color: 0x73140b,
+      metalness: 0.92,
+      roughness: 0.24,
       roughnessMap: brushedRoughness,
       normalMap: brushedNormal,
       normalScale: new THREE.Vector2(0.35, 0.35),
-      clearcoat: 0.45,
-      clearcoatRoughness: 0.22,
+      clearcoat: 0.55,
+      clearcoatRoughness: 0.18,
       side: THREE.DoubleSide
     });
 
     const champagneGoldMat = new THREE.MeshPhysicalMaterial({
-      color: 0xebc067,
-      metalness: 0.96,
-      roughness: 0.16,
+      color: 0xf2c86b,
+      metalness: 0.97,
+      roughness: 0.14,
       roughnessMap: brushedRoughness,
       normalMap: brushedNormal,
       normalScale: new THREE.Vector2(0.2, 0.2),
-      clearcoat: 0.3
+      clearcoat: 0.35
     });
 
     const castBronzeBaseMat = new THREE.MeshPhysicalMaterial({
-      color: 0xc88d50,
-      metalness: 0.92,
-      roughness: 0.22,
+      color: 0xd49552,
+      metalness: 0.94,
+      roughness: 0.20,
       roughnessMap: brushedRoughness,
       normalMap: brushedNormal,
       normalScale: new THREE.Vector2(0.25, 0.25)
     });
 
     const brushedTitaniumMat = new THREE.MeshPhysicalMaterial({
-      color: 0x454b54,
-      metalness: 0.88,
-      roughness: 0.26,
+      color: 0x4b4652,
+      metalness: 0.90,
+      roughness: 0.24,
       roughnessMap: brushedRoughness,
       normalMap: brushedNormal,
       normalScale: new THREE.Vector2(0.3, 0.3)
     });
 
-    // Deep Piano-Lacquer Vermilion Shield (Clean solid surface, no text or logo)
     const lacquerCrimsonMat = new THREE.MeshPhysicalMaterial({
-      color: 0xbf1713,
-      metalness: 0.08,
-      roughness: 0.24,
+      map: plaqueColorTex,
+      bumpMap: plaqueBumpTex,
+      bumpScale: 0.04,
+      metalness: 0.24,
+      roughness: 0.22,
       clearcoat: 0.92,
-      clearcoatRoughness: 0.12
+      clearcoatRoughness: 0.10
     });
 
-    // 1. Stepped Circular Cast-Bronze Pedestal Base with Champagne-Gold Moulding
-    const baseLowerDisc = new THREE.Mesh(new THREE.CylinderGeometry(2.08, 2.16, 0.14, 72), castBronzeBaseMat);
+    // Optional Auto-Load for External PNG File ("sage-50-logo.png" in repo)
+    const imgLoader = new THREE.ImageLoader();
+    imgLoader.load(
+      './sage-50-logo.png',
+      (loadedImg) => {
+        const w = 2048, h = 2304;
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        const ctx = c.getContext('2d');
+
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+        bgGrad.addColorStop(0, '#cc1814');
+        bgGrad.addColorStop(0.55, '#b5120e');
+        bgGrad.addColorStop(1, '#8f0b08');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        const scale = Math.min((w * 0.78) / loadedImg.width, (h * 0.72) / loadedImg.height);
+        const dw = loadedImg.width * scale;
+        const dh = loadedImg.height * scale;
+        ctx.drawImage(loadedImg, (w - dw) / 2, (h - dh) / 2, dw, dh);
+
+        const customTex = new THREE.CanvasTexture(c);
+        customTex.colorSpace = THREE.SRGBColorSpace;
+        customTex.anisotropy = maxAnisotropy;
+        lacquerCrimsonMat.map = customTex;
+        lacquerCrimsonMat.needsUpdate = true;
+      },
+      undefined,
+      () => {}
+    );
+
+    // 1. Stepped Circular Cast-Bronze Pedestal Base (96 radial segments)
+    const baseLowerDisc = new THREE.Mesh(new THREE.CylinderGeometry(2.08, 2.16, 0.14, 96), castBronzeBaseMat);
     baseLowerDisc.position.set(0, 0.07, 0);
     baseLowerDisc.castShadow = true;
     baseLowerDisc.receiveShadow = true;
     cauldronGroup.add(baseLowerDisc);
 
-    const baseUpperDisc = new THREE.Mesh(new THREE.CylinderGeometry(1.94, 2.02, 0.12, 72), castBronzeBaseMat);
+    const baseUpperDisc = new THREE.Mesh(new THREE.CylinderGeometry(1.94, 2.02, 0.12, 96), castBronzeBaseMat);
     baseUpperDisc.position.set(0, 0.20, 0);
     baseUpperDisc.castShadow = true;
     cauldronGroup.add(baseUpperDisc);
 
-    const baseGoldRing = new THREE.Mesh(new THREE.TorusGeometry(2.04, 0.032, 16, 80), champagneGoldMat);
+    const baseGoldRing = new THREE.Mesh(new THREE.TorusGeometry(2.04, 0.032, 20, 112), champagneGoldMat);
     baseGoldRing.rotation.x = Math.PI / 2;
     baseGoldRing.position.set(0, 0.15, 0);
     cauldronGroup.add(baseGoldRing);
 
-    // 2. Four Chamfered Brushed-Titanium Tower Pillars with Gold Edge Bevels
+    // 2. Four Chamfered Brushed-Titanium Tower Pillars with Gold Inlays
     function createLuxuryPillar(xPos, zPos, mirrorX, mirrorZ) {
       const group = new THREE.Group();
 
@@ -648,9 +886,9 @@
       const geom = new THREE.ExtrudeGeometry(shape, {
         depth: 0.56,
         bevelEnabled: true,
-        bevelThickness: 0.032,
-        bevelSize: 0.032,
-        bevelSegments: 4
+        bevelThickness: 0.034,
+        bevelSize: 0.034,
+        bevelSegments: 5
       });
       geom.center();
 
@@ -659,8 +897,7 @@
       mesh.receiveShadow = true;
       group.add(mesh);
 
-      // Precision champagne-gold architectural inlay strip along outer edge
-      const inlay = new THREE.Mesh(new THREE.BoxGeometry(0.036, 3.60, 0.62), champagneGoldMat);
+      const inlay = new THREE.Mesh(new THREE.BoxGeometry(0.04, 3.60, 0.63), champagneGoldMat);
       inlay.position.set(0.36, 0, 0);
       inlay.rotation.z = -0.048;
       group.add(inlay);
@@ -676,30 +913,29 @@
     cauldronGroup.add(createLuxuryPillar(-1.18, -0.68, -1, -1));
     cauldronGroup.add(createLuxuryPillar(1.18, -0.68, 1, -1));
 
-    // Warm copper-amber architectural uplight on the pedestal base & lower pillars
-    const baseWarmGlow = new THREE.PointLight(0xff7b29, 24, 9.5, 1.5);
+    const baseWarmGlow = new THREE.PointLight(0xff8c2b, 26, 10.5, 1.4);
     baseWarmGlow.position.set(0, 0.95, 1.85);
     cauldronGroup.add(baseWarmGlow);
 
-    // 3. Exposed Precision-Machined Gold Burner Manifold Under the Bowl
-    const burnerCore = new THREE.Mesh(new THREE.CylinderGeometry(0.56, 0.46, 0.72, 32), champagneGoldMat);
+    // 3. Exposed Precision-Machined Gold Burner Manifold
+    const burnerCore = new THREE.Mesh(new THREE.CylinderGeometry(0.56, 0.46, 0.72, 48), champagneGoldMat);
     burnerCore.position.set(0, 3.72, 0);
     cauldronGroup.add(burnerCore);
 
     [3.52, 3.76].forEach(ry => {
-      const collar = new THREE.Mesh(new THREE.TorusGeometry(0.58, 0.034, 14, 36), champagneGoldMat);
+      const collar = new THREE.Mesh(new THREE.TorusGeometry(0.58, 0.034, 18, 48), champagneGoldMat);
       collar.rotation.x = Math.PI / 2;
       collar.position.set(0, ry, 0);
       cauldronGroup.add(collar);
     });
 
     [-0.30, -0.10, 0.10, 0.30].forEach(px => {
-      const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.036, 0.82, 14), champagneGoldMat);
+      const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.036, 0.82, 18), champagneGoldMat);
       pipe.position.set(px, 3.70, 0.46);
       cauldronGroup.add(pipe);
     });
 
-    // 4. Clean Piano-Lacquer Vermilion-Red Trapezoidal Shield (No text or emblem)
+    // 4. Trapezoidal Crimson Plaque with Ultra-Crisp SAGE 50th Logo
     const shieldShape = new THREE.Shape();
     shieldShape.moveTo(-0.88, -1.24);
     shieldShape.lineTo(0.88, -1.24);
@@ -712,9 +948,17 @@
       bevelEnabled: true,
       bevelThickness: 0.018,
       bevelSize: 0.018,
-      bevelSegments: 3
+      bevelSegments: 4
     });
     shieldGeom.center();
+
+    const sPos = shieldGeom.attributes.position;
+    const sUv = shieldGeom.attributes.uv;
+    for (let i = 0; i < sPos.count; i++) {
+      const x = sPos.getX(i);
+      const y = sPos.getY(i);
+      sUv.setXY(i, (x / 2.28) + 0.5, (y / 2.52) + 0.5);
+    }
 
     const plaqueMesh = new THREE.Mesh(shieldGeom, lacquerCrimsonMat);
     plaqueMesh.position.set(0, 2.28, 0.66);
@@ -722,7 +966,7 @@
     plaqueMesh.receiveShadow = true;
     cauldronGroup.add(plaqueMesh);
 
-    // 5. Wide Flared Bowl Shell + High-Relief 3D Champagne-Gold Cloud Filigree
+    // 5. Ultra-Smooth 144-Segment Bowl + High-Relief 24K Gold Cloud Filigree
     const bowlPoints = [
       new THREE.Vector2(0.0, 0.0),
       new THREE.Vector2(1.45, 0.04),
@@ -733,7 +977,7 @@
       new THREE.Vector2(3.60, 0.72),
       new THREE.Vector2(0.0, 0.48)
     ];
-    const bowlGeom = new THREE.LatheGeometry(bowlPoints, 112);
+    const bowlGeom = new THREE.LatheGeometry(bowlPoints, 144);
     const bowlMesh = new THREE.Mesh(bowlGeom, hammeredCopperMat);
     bowlMesh.position.set(0, 3.80, 0);
     bowlMesh.castShadow = true;
@@ -744,23 +988,22 @@
     filigreeGroup.position.set(0, 3.80, 0);
     cauldronGroup.add(filigreeGroup);
 
-    // Double chamfered champagne-gold lip rings
-    const topRimOuter = new THREE.Mesh(new THREE.TorusGeometry(4.50, 0.052, 18, 128), champagneGoldMat);
+    const topRimOuter = new THREE.Mesh(new THREE.TorusGeometry(4.50, 0.052, 22, 160), champagneGoldMat);
     topRimOuter.rotation.x = Math.PI / 2;
     topRimOuter.position.y = 1.06;
     filigreeGroup.add(topRimOuter);
 
-    const topRimInner = new THREE.Mesh(new THREE.TorusGeometry(4.34, 0.032, 14, 128), champagneGoldMat);
+    const topRimInner = new THREE.Mesh(new THREE.TorusGeometry(4.34, 0.032, 18, 160), champagneGoldMat);
     topRimInner.rotation.x = Math.PI / 2;
     topRimInner.position.y = 1.09;
     filigreeGroup.add(topRimInner);
 
-    const midRib = new THREE.Mesh(new THREE.TorusGeometry(3.68, 0.03, 12, 108), champagneGoldMat);
+    const midRib = new THREE.Mesh(new THREE.TorusGeometry(3.68, 0.03, 16, 140), champagneGoldMat);
     midRib.rotation.x = Math.PI / 2;
     midRib.position.y = 0.56;
     filigreeGroup.add(midRib);
 
-    const lowRim = new THREE.Mesh(new THREE.TorusGeometry(2.42, 0.038, 12, 96), champagneGoldMat);
+    const lowRim = new THREE.Mesh(new THREE.TorusGeometry(2.42, 0.038, 16, 120), champagneGoldMat);
     lowRim.rotation.x = Math.PI / 2;
     lowRim.position.y = 0.19;
     filigreeGroup.add(lowRim);
@@ -778,7 +1021,7 @@
 
       const ptsUpper = [];
       const turns = 2.15;
-      const steps = 44;
+      const steps = 56;
       for (let s = 0; s <= steps; s++) {
         const frac = s / steps;
         const angle = frac * Math.PI * 2 * turns;
@@ -789,14 +1032,14 @@
       }
       const upperCurve = new THREE.CatmullRomCurve3(ptsUpper);
       filigreeGroup.add(new THREE.Mesh(
-        new THREE.TubeGeometry(upperCurve, 38, 0.034, 10, false),
+        new THREE.TubeGeometry(upperCurve, 52, 0.034, 12, false),
         champagneGoldMat
       ));
 
       const ptsLower = [];
       const lowBaseTheta = baseTheta + (Math.PI / numSpirals);
-      for (let s = 0; s <= 34; s++) {
-        const frac = s / 34;
+      for (let s = 0; s <= 44; s++) {
+        const frac = s / 44;
         const angle = frac * Math.PI * 2 * 1.85;
         const spiralRad = frac * 0.085;
         const theta = lowBaseTheta - Math.cos(angle) * spiralRad * dir;
@@ -805,25 +1048,23 @@
       }
       const lowerCurve = new THREE.CatmullRomCurve3(ptsLower);
       filigreeGroup.add(new THREE.Mesh(
-        new THREE.TubeGeometry(lowerCurve, 30, 0.027, 10, false),
+        new THREE.TubeGeometry(lowerCurve, 40, 0.027, 12, false),
         champagneGoldMat
       ));
     }
 
     // =========================================================================
-    // 6. VOLUMETRIC STADIUM SEARCHLIGHTS & DRAMATIC CEREMONIAL LIGHTING
+    // 6. GOLDEN & CRYSTAL STADIUM SEARCHLIGHTS + PROSPEROUS GALA LIGHTING
     // =========================================================================
     const beamMeshes = [];
-    const fixtureMat = new THREE.MeshBasicMaterial({ color: 0xf4fcff });
+    const fixtureMat = new THREE.MeshBasicMaterial({ color: 0xfff8e6 });
 
-    function createSearchlight(x, y, z, targetX, targetY, targetZ, beamRadius, beamLength, opacity, showLamp = true) {
-      if (showLamp) {
-        const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.22, 14, 14), fixtureMat);
-        lamp.position.set(x, y, z);
-        scene.add(lamp);
-      }
+    function createSearchlight(x, y, z, targetX, targetY, targetZ, beamRadius, beamLength, opacity, colorHex = 0xffe4ad) {
+      const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), fixtureMat);
+      lamp.position.set(x, y, z);
+      scene.add(lamp);
 
-      const coneGeom = new THREE.ConeGeometry(beamRadius, beamLength, 36, 1, true);
+      const coneGeom = new THREE.ConeGeometry(beamRadius, beamLength, 40, 1, true);
       coneGeom.translate(0, -beamLength / 2, 0);
       const coneMat = new THREE.ShaderMaterial({
         transparent: true,
@@ -831,7 +1072,7 @@
         blending: THREE.AdditiveBlending,
         side: THREE.DoubleSide,
         uniforms: {
-          uColor: { value: new THREE.Color(0xc2ebff) },
+          uColor: { value: new THREE.Color(colorHex) },
           uOpacity: { value: opacity }
         },
         vertexShader: `
@@ -868,50 +1109,47 @@
       beamMeshes.push({ cone, baseRotZ: cone.rotation.z, phase: Math.random() * Math.PI * 2 });
     }
 
-    // Overhead truss searchlights sweeping across the arena
-    createSearchlight(-19.5, 14.8, -23.5, -11.5, 1.0, -14, 2.5, 24, 0.14);
-    createSearchlight(-17.2, 14.8, -23.5, -7.2, 1.5, -12, 2.3, 24, 0.14);
-    createSearchlight(-11.5, 14.8, -23.5, -17.5, 1.2, -14, 2.3, 23, 0.13);
-    createSearchlight(-9.2, 14.8, -23.5, -3.2, 2.0, -10, 2.6, 24, 0.13);
+    // Warm champagne-gold & crystal-white gala searchlight beams
+    createSearchlight(-19.5, 15.0, -23.5, -11.5, 1.0, -14, 2.5, 24, 0.14, 0xffe4ad);
+    createSearchlight(-17.2, 15.0, -23.5, -7.2, 1.5, -12, 2.3, 24, 0.14, 0xd8f0ff);
+    createSearchlight(-11.5, 15.0, -23.5, -17.5, 1.2, -14, 2.3, 23, 0.13, 0xffe4ad);
+    createSearchlight(-9.2, 15.0, -23.5, -3.2, 2.0, -10, 2.6, 24, 0.13, 0xd8f0ff);
 
-    createSearchlight(2.0, 14.8, -23.5, -6.5, 1.0, -10, 3.1, 25, 0.15);
-    createSearchlight(7.5, 14.8, -23.5, -1.2, 1.5, -8, 2.9, 25, 0.16);
-    createSearchlight(11.0, 14.8, -23.5, 2.4, 1.8, -6, 2.9, 25, 0.16);
-    createSearchlight(13.8, 14.8, -23.5, 6.2, 1.2, -6, 2.7, 25, 0.15);
-    createSearchlight(16.6, 14.8, -23.5, 10.2, 1.0, -8, 2.7, 25, 0.14);
-    createSearchlight(19.4, 14.8, -23.5, 14.5, 1.0, -10, 2.7, 25, 0.14);
+    createSearchlight(2.0, 15.0, -23.5, -6.5, 1.0, -10, 3.1, 25, 0.15, 0xffe4ad);
+    createSearchlight(7.5, 15.0, -23.5, -1.2, 1.5, -8, 2.9, 25, 0.16, 0xd8f0ff);
+    createSearchlight(11.0, 15.0, -23.5, 2.4, 1.8, -6, 2.9, 25, 0.16, 0xffe4ad);
+    createSearchlight(13.8, 15.0, -23.5, 6.2, 1.2, -6, 2.7, 25, 0.15, 0xd8f0ff);
+    createSearchlight(16.6, 15.0, -23.5, 10.2, 1.0, -8, 2.7, 25, 0.14, 0xffe4ad);
+    createSearchlight(19.4, 15.0, -23.5, 14.5, 1.0, -10, 2.7, 25, 0.14, 0xd8f0ff);
 
-    // Floor & mid-tier crossing beams
-    createSearchlight(-16.0, 0.4, -14, -7.8, 13.5, -21, 2.2, 21, 0.16);
-    createSearchlight(-12.2, 0.4, -14, -18.5, 12.5, -21, 2.1, 20, 0.15);
-    createSearchlight(10.0, 3.6, -11, 1.5, 6.4, -4, 2.1, 15, 0.16);
-    createSearchlight(18.0, 4.4, -12, 8.8, 2.2, -6, 2.3, 16, 0.16);
+    createSearchlight(-16.0, 0.4, -14, -7.8, 13.5, -21, 2.2, 21, 0.16, 0xffe4ad);
+    createSearchlight(16.0, 0.4, -14, 7.8, 13.5, -21, 2.2, 21, 0.16, 0xffe4ad);
 
-    // Key, Rim & Fill Lighting
-    const hemiLight = new THREE.HemisphereLight(0xdceeff, 0x3b322e, 1.15);
+    const hemiLight = new THREE.HemisphereLight(0xfff0d6, 0x472826, 1.25);
     scene.add(hemiLight);
 
-    const frontKeyLight = new THREE.DirectionalLight(0xfff5e8, 2.35);
-    frontKeyLight.position.set(4.5, 11.0, 12.5);
+    const frontKeyLight = new THREE.DirectionalLight(0xfff6e8, 2.45);
+    frontKeyLight.position.set(4.5, 11.5, 13.0);
     frontKeyLight.castShadow = true;
+    frontKeyLight.shadow.mapSize.set(2048, 2048);
     scene.add(frontKeyLight);
 
-    const leftRimLight = new THREE.DirectionalLight(0xc2e6ff, 1.35);
+    const leftRimLight = new THREE.DirectionalLight(0xffdfa8, 1.45);
     leftRimLight.position.set(-10, 9, 4);
     scene.add(leftRimLight);
 
-    const stageSpot = new THREE.SpotLight(0xe0f4ff, 65, 38, Math.PI / 4.8, 0.65, 1.0);
-    stageSpot.position.set(5.5, 12, 6);
+    const stageSpot = new THREE.SpotLight(0xfff2d6, 70, 40, Math.PI / 4.6, 0.65, 1.0);
+    stageSpot.position.set(0, 13, 6);
     stageSpot.target.position.set(0, 0, 0);
     scene.add(stageSpot);
     scene.add(stageSpot.target);
 
-    const fireLight = new THREE.PointLight(0xff8a1c, 0, 30, 1.2);
+    const fireLight = new THREE.PointLight(0xff8c1a, 0, 32, 1.2);
     fireLight.position.set(0, 6.1, 0.9);
     scene.add(fireLight);
 
     // =========================================================================
-    // 7. PHOTOREALISTIC MULTI-LAYERED OLYMPIC FLAME SHADER
+    // 7. PHOTOREALISTIC MULTI-LAYERED OLYMPIC FLAME & GOLDEN SPARKS
     // =========================================================================
     const fireUniforms = {
       uTime: { value: 0 },
@@ -1012,16 +1250,16 @@
     firePlane3.rotation.y = -0.24;
     cauldronGroup.add(firePlane3);
 
-    // --- 3D Rising Sparks ---
-    const sparkCount = 260;
+    // 3D Rising Sparks & Prosperous Golden Dust Motes
+    const sparkCount = 320;
     const sparkGeom = new THREE.BufferGeometry();
     const sparkPos = new Float32Array(sparkCount * 3);
     const sparkVel = [];
 
     for (let i = 0; i < sparkCount; i++) {
-      sparkPos[i * 3] = (Math.random() - 0.5) * 6.5;
-      sparkPos[i * 3 + 1] = 4.8 + Math.random() * 5.8;
-      sparkPos[i * 3 + 2] = (Math.random() - 0.5) * 1.5;
+      sparkPos[i * 3] = (Math.random() - 0.5) * 7.2;
+      sparkPos[i * 3 + 1] = 4.8 + Math.random() * 6.2;
+      sparkPos[i * 3 + 2] = (Math.random() - 0.5) * 1.8;
       sparkVel.push({
         vx: (Math.random() - 0.5) * 0.032,
         vy: 0.035 + Math.random() * 0.075,
@@ -1031,8 +1269,8 @@
     sparkGeom.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3));
 
     const sparkMat = new THREE.PointsMaterial({
-      color: 0xffd973,
-      size: 0.085,
+      color: 0xffdf7a,
+      size: 0.09,
       transparent: true,
       opacity: 0,
       blending: THREE.AdditiveBlending,
@@ -1040,6 +1278,27 @@
     });
     const sparkPoints = new THREE.Points(sparkGeom, sparkMat);
     cauldronGroup.add(sparkPoints);
+
+    // Ambient floating golden celebration dust in the stadium air
+    const ambientDustCount = 180;
+    const dustGeom = new THREE.BufferGeometry();
+    const dustPos = new Float32Array(ambientDustCount * 3);
+    for (let i = 0; i < ambientDustCount; i++) {
+      dustPos[i * 3] = (Math.random() - 0.5) * 26;
+      dustPos[i * 3 + 1] = Math.random() * 11;
+      dustPos[i * 3 + 2] = (Math.random() - 0.5) * 18 - 4;
+    }
+    dustGeom.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+    const dustMat = new THREE.PointsMaterial({
+      color: 0xffe082,
+      size: 0.065,
+      transparent: true,
+      opacity: 0.45,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const ambientDust = new THREE.Points(dustGeom, dustMat);
+    scene.add(ambientDust);
 
     // --- Responsive Framing: Cauldron = 1/2 Screen Height, >= 1/2 Screen Width ---
     function updateFraming() {
@@ -1087,7 +1346,15 @@
       fireUniforms.uHeat.value = heatNorm;
 
       const flicker = Math.sin(elapsed * 21.0) * 0.14 + Math.cos(elapsed * 33.0) * 0.09;
-      fireLight.intensity = heatNorm > 0.01 ? (heatNorm * 52 + flicker * 9 * heatNorm) : 0;
+      fireLight.intensity = heatNorm > 0.01 ? (heatNorm * 56 + flicker * 9 * heatNorm) : 0;
+
+      // Synchronize ceremonial side braziers with the main cauldron fire
+      sideBrazierLights.forEach((b, idx) => {
+        const bFlicker = Math.sin(elapsed * 18.0 + idx) * 0.15;
+        b.light.intensity = heatNorm > 0.05 ? (heatNorm * 18 + bFlicker * 4 * heatNorm) : 0;
+        b.orb.material.opacity = Math.min(0.9, heatNorm * 1.1);
+        b.orb.scale.set(1.1 + bFlicker * 0.1, 1.65 + bFlicker * 0.25, 1.1);
+      });
 
       sparkMat.opacity = Math.min(0.95, heatNorm * 1.15);
       const posArr = sparkGeom.attributes.position.array;
@@ -1106,6 +1373,15 @@
         }
       }
       sparkGeom.attributes.position.needsUpdate = true;
+
+      // Gentle upward drift for golden celebration dust
+      const dArr = dustGeom.attributes.position.array;
+      for (let i = 0; i < ambientDustCount; i++) {
+        dArr[i * 3 + 1] += 0.006;
+        dArr[i * 3] += Math.sin(elapsed * 0.6 + i) * 0.003;
+        if (dArr[i * 3 + 1] > 11) dArr[i * 3 + 1] = 0.2;
+      }
+      dustGeom.attributes.position.needsUpdate = true;
 
       beamMeshes.forEach((b) => {
         b.cone.rotation.z = b.baseRotZ + Math.sin(elapsed * 0.35 + b.phase) * 0.025;
