@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>五十載耆康安老 以初心關顧同行 — 聖火儀式</title>
+    <!-- Tailwind CSS for crisp UI styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Noto Serif TC for ceremonial Traditional Chinese typography & Cinzel for gold emblems -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* Base resets & custom ceremonial typography */
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #030712;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-ceremony-tc {
+            font-family: 'Noto Serif TC', serif;
+        }
+
+        .font-ceremony-en {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Metallic Gold Text Effect with Shimmer */
+        .gold-text {
+            background: linear-gradient(
+                180deg,
+                #FFFBEB 0%,
+                #FDE68A 25%,
+                #F59E0B 55%,
+                #B45309 85%,
+                #FDE68A 100%
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 18px rgba(245, 158, 11, 0.55)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9));
+        }
+
+        /* Ceremonial Reveal Transitions */
+        .climax-layer {
+            opacity: 0;
+            transform: scale(0.94) translateY(12px);
+            transition: opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 1.6s cubic-bezier(0.22, 1, 0.36, 1);
+            pointer-events: none;
+        }
+
+        .climax-layer.active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        .slogan-left {
+            opacity: 0;
+            transform: translateX(-35px);
+            transition: opacity 1.5s ease-out 0.2s, transform 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+        }
+
+        .climax-layer.active .slogan-left {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .slogan-right {
+            opacity: 0;
+            transform: translateX(35px);
+            transition: opacity 1.5s ease-out 0.45s, transform 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.45s;
+        }
+
+        .climax-layer.active .slogan-right {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Ambient Gold Ray Rotation */
+        @keyframes slowSpin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .sunburst-rays {
+            animation: slowSpin 60s linear infinite;
+        }
+
+        /* Custom Range Slider for Backstage Console */
+        input[type="range"].stage-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        input[type="range"].stage-slider::-webkit-slider-runnable-track {
+            height: 10px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #1e293b 0%, #92400e 45%, #f59e0b 85%, #fef08a 100%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        input[type="range"].stage-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #ffffff, #fbbf24 60%, #d97706 100%);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.8), 0 2px 6px rgba(0, 0, 0, 0.7);
+            margin-top: -8px;
+            border: 2px solid #fffbeb;
+            transition: transform 0.15s ease;
+        }
+
+        input[type="range"].stage-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        /* Discreet Backstage Trigger Button (Almost invisible during projection) */
+        #backstage-trigger {
+            opacity: 0.12;
+            transition: opacity 0.3s ease, transform 0.2s ease;
+        }
+        #backstage-trigger:hover, #backstage-trigger:focus {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body class="relative w-screen h-screen overflow-hidden bg-slate-950">
+
+    <!-- 1. Main Full-Screen Stage Canvas (Backdrop, Architectural Pillars, Dynamic Fire, Cauldron, Embers) -->
+    <canvas id="stageCanvas" class="block w-full h-full"></canvas>
+
+    <!-- 2. Grand Celebratory Climax Overlay (Reveals at 95% - 100% Fire Intensity) -->
+    <div id="climaxOverlay" class="climax-layer fixed inset-0 z-10 flex flex-col justify-between pointer-events-none px-4 sm:px-10 md:px-16 py-6 sm:py-10">
+        
+        <!-- Subtle Rotating Golden Light Rays Behind Slogans -->
+        <div class="sunburst-rays fixed top-[42%] left-1/2 w-[140vmax] h-[140vmax] opacity-25 pointer-events-none"
+             style="background: repeating-conic-gradient(from 0deg, rgba(251, 191, 36, 0.28) 0deg 4deg, transparent 4deg 15deg); mask-image: radial-gradient(circle, black 10%, transparent 65%); -webkit-mask-image: radial-gradient(circle, black 10%, transparent 65%);">
+        </div>
+
+        <!-- Upper Ceremonial Framing: Left & Right Slogan Wings flanking the Central Flame -->
+        <div class="w-full max-w-[1600px] mx-auto my-auto grid grid-cols-1 lg:grid-cols-12 items-center gap-6 lg:gap-4 pt-4 sm:pt-8">
+            
+            <!-- Left Wing: 50th Anniversary Emblem + First Half of Slogan -->
+            <div class="slogan-left lg:col-span-5 flex flex-col items-center text-center">
+                <!-- Golden Laurel & "50" Emblem -->
+                <div class="relative flex items-center justify-center mb-3 sm:mb-5">
+                    <svg class="w-28 h-20 sm:w-36 sm:h-24 md:w-44 md:h-28 drop-shadow-[0_0_16px_rgba(251,191,36,0.65)]" viewBox="0 0 220 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="laurelGoldL" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#FEF9C3"/>
+                                <stop offset="45%" stop-color="#FBBF24"/>
+                                <stop offset="100%" stop-color="#B45309"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Left Laurel Branch -->
+                        <path d="M68 112 C35 96, 22 65, 34 30 C40 16, 52 10, 62 8" stroke="url(#laurelGoldL)" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M56 105 C42 102, 34 94, 38 86 C46 89, 53 96, 56 105 Z" fill="url(#laurelGoldL)"/>
+                        <path d="M44 88 C28 83, 22 72, 28 63 C36 68, 42 78, 44 88 Z" fill="url(#laurelGoldL)"/>
+                        <path d="M36 68 C20 60, 17 48, 25 40 C32 47, 36 57, 36 68 Z" fill="url(#laurelGoldL)"/>
+                        <path d="M36 47 C24 37, 25 24, 35 19 C39 27, 39 37, 36 47 Z" fill="url(#laurelGoldL)"/>
+                        <path d="M46 28 C39 17, 45 7, 55 6 C55 15, 51 22, 46 28 Z" fill="url(#laurelGoldL)"/>
+                        <!-- Inner leaves -->
+                        <path d="M60 98 C55 88, 60 78, 68 76 C68 85, 65 92, 60 98 Z" fill="url(#laurelGoldL)" opacity="0.85"/>
+                        <path d="M47 78 C44 67, 50 58, 59 58 C57 67, 53 73, 47 78 Z" fill="url(#laurelGoldL)" opacity="0.85"/>
+                        <path d="M41 56 C41 45, 48 38, 57 39 C53 47, 48 52, 41 56 Z" fill="url(#laurelGoldL)" opacity="0.85"/>
+
+                        <!-- Right Laurel Branch -->
+                        <path d="M152 112 C185 96, 198 65, 186 30 C180 16, 168 10, 158 8" stroke="url(#laurelGoldL)" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M164 105 C178 102, 186 94, 182 86 C174 89, 167 96, 164 105 Z" fill="url(#laurelGoldL)"/>
+                        <path d="M176 88 C192 83, 198 72, 192 63 C184 68, 178 78, 176 88 Z" fill="url(#laurelGoldL)"/>
+                        <path d="M184 68 C200 60, 203 48, 195 40 C188 47, 184 57, 184 68 Z" fill="url(#laurelGoldL)"/>
+                        <path d="M184 47 C196 37, 195 24, 185 19 C181 27, 181 37, 184 47 Z" fill="url(#laurelGoldL)"/>
+                        <path d="M174 28 C181 17, 175 7, 165 6 C165 15, 169 22, 174 28 Z" fill="url(#laurelGoldL)"/>
+                        <!-- Inner leaves -->
+                        <path d="M160 98 C165 88, 160 78, 152 76 C152 85, 155 92, 160 98 Z" fill="url(#laurelGoldL)" opacity="0.85"/>
+                        <path d="M173 78 C176 67, 170 58, 161 58 C163 67, 167 73, 173 78 Z" fill="url(#laurelGoldL)" opacity="0.85"/>
+                        <path d="M179 56 C179 45, 172 38, 163 39 C167 47, 172 52, 179 56 Z" fill="url(#laurelGoldL)" opacity="0.85"/>
+
+                        <!-- Top Crown Star -->
+                        <polygon points="110,6 113,14 121,14 115,19 117,27 110,22 103,27 105,19 99,14 107,14" fill="#FEF08A"/>
+                        <!-- Number 50 -->
+                        <text x="110" y="76" text-anchor="middle" fill="url(#laurelGoldL)" font-family="Cinzel, serif" font-weight="800" font-size="48" letter-spacing="2">50</text>
+                        <text x="110" y="96" text-anchor="middle" fill="#FDE68A" font-family="Cinzel, serif" font-weight="700" font-size="11" letter-spacing="4">ANNIVERSARY</text>
+                    </svg>
+                </div>
+
+                <!-- Slogan Part 1 -->
+                <h1 class="font-ceremony-tc gold-text font-black text-3xl sm:text-4xl md:text-5xl xl:text-[3.4rem] tracking-[0.14em] leading-tight">
+                    五十載耆康安老
+                </h1>
+                <div class="w-36 sm:w-48 h-[2px] mt-3 sm:mt-4 bg-gradient-to-r from-transparent via-amber-300 to-transparent opacity-80"></div>
+            </div>
+
+            <!-- Center Spacer: Leaves open stage space for the roaring Olympic Flame -->
+            <div class="hidden lg:block lg:col-span-2 h-64"></div>
+
+            <!-- Right Wing: 50th Anniversary Emblem + Second Half of Slogan -->
+            <div class="slogan-right lg:col-span-5 flex flex-col items-center text-center mt-2 lg:mt-0">
+                <!-- Golden Laurel & "50" Emblem (Hidden on small mobile to avoid duplication, shown on sm+) -->
+                <div class="hidden sm:flex relative items-center justify-center mb-3 sm:mb-5">
+                    <svg class="w-28 h-20 sm:w-36 sm:h-24 md:w-44 md:h-28 drop-shadow-[0_0_16px_rgba(251,191,36,0.65)]" viewBox="0 0 220 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="laurelGoldR" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#FEF9C3"/>
+                                <stop offset="45%" stop-color="#FBBF24"/>
+                                <stop offset="100%" stop-color="#B45309"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Left Laurel Branch -->
+                        <path d="M68 112 C35 96, 22 65, 34 30 C40 16, 52 10, 62 8" stroke="url(#laurelGoldR)" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M56 105 C42 102, 34 94, 38 86 C46 89, 53 96, 56 105 Z" fill="url(#laurelGoldR)"/>
+                        <path d="M44 88 C28 83, 22 72, 28 63 C36 68, 42 78, 44 88 Z" fill="url(#laurelGoldR)"/>
+                        <path d="M36 68 C20 60, 17 48, 25 40 C32 47, 36 57, 36 68 Z" fill="url(#laurelGoldR)"/>
+                        <path d="M36 47 C24 37, 25 24, 35 19 C39 27, 39 37, 36 47 Z" fill="url(#laurelGoldR)"/>
+                        <path d="M46 28 C39 17, 45 7, 55 6 C55 15, 51 22, 46 28 Z" fill="url(#laurelGoldR)"/>
+                        <!-- Inner leaves -->
+                        <path d="M60 98 C55 88, 60 78, 68 76 C68 85, 65 92, 60 98 Z" fill="url(#laurelGoldR)" opacity="0.85"/>
+                        <path d="M47 78 C44 67, 50 58, 59 58 C57 67, 53 73, 47 78 Z" fill="url(#laurelGoldR)" opacity="0.85"/>
+                        <path d="M41 56 C41 45, 48 38, 57 39 C53 47, 48 52, 41 56 Z" fill="url(#laurelGoldR)" opacity="0.85"/>
+
+                        <!-- Right Laurel Branch -->
+                        <path d="M152 112 C185 96, 198 65, 186 30 C180 16, 168 10, 158 8" stroke="url(#laurelGoldR)" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M164 105 C178 102, 186 94, 182 86 C174 89, 167 96, 164 105 Z" fill="url(#laurelGoldR)"/>
+                        <path d="M176 88 C192 83, 198 72, 192 63 C184 68, 178 78, 176 88 Z" fill="url(#laurelGoldR)"/>
+                        <path d="M184 68 C200 60, 203 48, 195 40 C188 47, 184 57, 184 68 Z" fill="url(#laurelGoldR)"/>
+                        <path d="M184 47 C196 37, 195 24, 185 19 C181 27, 181 37, 184 47 Z" fill="url(#laurelGoldR)"/>
+                        <path d="M174 28 C181 17, 175 7, 165 6 C165 15, 169 22, 174 28 Z" fill="url(#laurelGoldR)"/>
+                        <!-- Inner leaves -->
+                        <path d="M160 98 C165 88, 160 78, 152 76 C152 85, 155 92, 160 98 Z" fill="url(#laurelGoldR)" opacity="0.85"/>
+                        <path d="M173 78 C176 67, 170 58, 161 58 C163 67, 167 73, 173 78 Z" fill="url(#laurelGoldR)" opacity="0.85"/>
+                        <path d="M179 56 C179 45, 172 38, 163 39 C167 47, 172 52, 179 56 Z" fill="url(#laurelGoldR)" opacity="0.85"/>
+
+                        <!-- Top Crown Star -->
+                        <polygon points="110,6 113,14 121,14 115,19 117,27 110,22 103,27 105,19 99,14 107,14" fill="#FEF08A"/>
+                        <!-- Number 50 -->
+                        <text x="110" y="76" text-anchor="middle" fill="url(#laurelGoldR)" font-family="Cinzel, serif" font-weight="800" font-size="48" letter-spacing="2">50</text>
+                        <text x="110" y="96" text-anchor="middle" fill="#FDE68A" font-family="Cinzel, serif" font-weight="700" font-size="11" letter-spacing="4">ANNIVERSARY</text>
+                    </svg>
+                </div>
+
+                <!-- Slogan Part 2 -->
+                <h2 class="font-ceremony-tc gold-text font-black text-3xl sm:text-4xl md:text-5xl xl:text-[3.4rem] tracking-[0.14em] leading-tight">
+                    以初心關顧同行
+                </h2>
+                <div class="w-36 sm:w-48 h-[2px] mt-3 sm:mt-4 bg-gradient-to-r from-transparent via-amber-300 to-transparent opacity-80"></div>
+            </div>
+        </div>
+
+        <!-- Bottom subtle ceremonial light line -->
+        <div class="w-full max-w-4xl mx-auto h-[1px] bg-gradient-to-r from-transparent via-amber-400/50 to-transparent"></div>
+    </div>
+
+    <!-- 3. Discreet Backstage Trigger Button (Bottom-Right Corner) -->
+    <button id="backstage-trigger"
+            title="Toggle Backstage Console (Shortcut: C)"
+            aria-label="Toggle Backstage Console"
+            class="fixed bottom-4 right-4 z-40 flex items-center gap-2 px-3 py-2 rounded-full bg-slate-900/80 border border-amber-500/30 text-amber-200 text-xs font-medium backdrop-blur-md shadow-lg cursor-pointer">
+        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+        </svg>
+        <span class="hidden sm:inline">Stage Console [C]</span>
+    </button>
+
+    <!-- 4. Backstage Control Console Drawer (Hidden by default for clean projection) -->
+    <div id="backstage-console"
+         class="fixed bottom-16 right-4 z-50 w-[calc(100vw-2rem)] max-w-md rounded-2xl bg-slate-950/90 border border-amber-500/30 text-slate-100 p-5 shadow-2xl backdrop-blur-xl transition-all duration-300 transform translate-y-4 opacity-0 pointer-events-none">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+            <div class="flex items-center gap-2.5">
+                <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-500 transition-colors duration-300"></span>
+                <div>
+                    <h3 class="text-sm font-semibold text-amber-300 tracking-wide">BACKSTAGE FLAME CONTROL</h3>
+                    <p id="stage-status-text" class="text-[11px] text-slate-400">Standby — Cauldron Unlit</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <!-- Fullscreen Toggle -->
+                <button id="btn-fullscreen"
+                        title="Toggle Fullscreen Projection"
+                        class="p-2 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                    </svg>
+                </button>
+                <!-- Hide Console Button -->
+                <button id="btn-close-console"
+                        title="Hide Console (Press C)"
+                        class="p-2 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Intensity Slider -->
+        <div class="mb-5">
+            <div class="flex justify-between items-end mb-2">
+                <label for="flame-slider" class="text-xs font-medium text-slate-300 uppercase tracking-wider">Flame Intensity</label>
+                <div class="flex items-baseline gap-1">
+                    <span id="intensity-value" class="text-2xl font-bold text-amber-400 tabular-nums">0</span>
+                    <span class="text-xs text-amber-500 font-semibold">%</span>
+                </div>
+            </div>
+            <input id="flame-slider" type="range" min="0" max="100" value="0" step="1" class="w-full stage-slider">
+            <div class="flex justify-between text-[10px] text-slate-500 mt-1 px-0.5">
+                <span>0% Unlit</span>
+                <span>30% Ignite</span>
+                <span>65% Rising</span>
+                <span class="text-amber-400/80 font-semibold">95%+ Climax Reveal</span>
+            </div>
+        </div>
+
+        <!-- Quick Stage Cue Presets -->
+        <div class="grid grid-cols-4 gap-2 mb-4">
+            <button data-preset="0"
+                    class="preset-btn py-2.5 px-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300 transition active:scale-95 cursor-pointer">
+                Off (0%)
+            </button>
+            <button data-preset="28"
+                    class="preset-btn py-2.5 px-2 rounded-xl bg-amber-950/70 hover:bg-amber-900/70 border border-amber-700/50 text-xs font-semibold text-amber-200 transition active:scale-95 cursor-pointer">
+                Ignite
+            </button>
+            <button data-preset="65"
+                    class="preset-btn py-2.5 px-2 rounded-xl bg-orange-950/80 hover:bg-orange-900/70 border border-orange-600/50 text-xs font-semibold text-orange-200 transition active:scale-95 cursor-pointer">
+                Medium
+            </button>
+            <button data-preset="100"
+                    class="preset-btn py-2.5 px-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/30 transition active:scale-95 cursor-pointer">
+                Peak Climax
+            </button>
+        </div>
+
+        <!-- Audio Synthesis Option & Keyboard Shortcuts Guide -->
+        <div class="flex items-center justify-between pt-3 border-t border-slate-800/80 text-[11px] text-slate-400">
+            <label class="flex items-center gap-2 cursor-pointer hover:text-slate-200 transition">
+                <input id="audio-toggle" type="checkbox" class="rounded accent-amber-500 w-3.5 h-3.5 cursor-pointer">
+                <span>Ceremonial Flame Sound</span>
+            </label>
+            <div class="text-right text-[10px] text-slate-500">
+                <span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">↑/↓</span> Adjust &nbsp;
+                <span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">Space</span> Step &nbsp;
+                <span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">C</span> Hide
+            </div>
+        </div>
+    </div>
+
+    <!-- Subtle Toast Notification for Fullscreen / Errors -->
+    <div id="toast-msg" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-slate-900/90 border border-amber-500/40 text-amber-200 text-xs shadow-xl opacity-0 pointer-events-none transition-opacity duration-300">
+    </div>
+
+    <script>
+        /**
+         * ============================================================================
+         * 50TH ANNIVERSARY CEREMONIAL CAULDRON & DYNAMIC FIRE SIMULATION
+         * ============================================================================
+         * Architecture:
+         * 1. State Management: Smoothly interpolates `currentIntensity` towards
+         *    `targetIntensity` (0.0 to 1.0) so operator slider drags or preset clicks
+         *    create organic, theatrical flame growth and dying embers.
+         * 2. Canvas Rendering Pipeline (60fps):
+         *    - Layer A: Deep ceremonial navy-gold backdrop + warm radial illumination
+         *    - Layer B: Architectural stage columns, curved amphitheater steps & floor
+         *    - Layer C: Ambient floating dust/gold bokeh particles
+         *    - Layer D: Additive-blended multi-layered turbulent fire core & tongues
+         *    - Layer E: Glowing rising sparks/embers & celebratory climax burst particles
+         *    - Layer F: Sculpted metallic Olympic-style cauldron bowl & fluted pedestal
+         *               with dynamic rim-lighting reacting in real time to fire brightness
+         * 3. Climax Trigger (>= 95% intensity): Activates the Traditional Chinese
+         *    slogan overlay ("五十載耆康安老 以初心關顧同行") and golden laurel emblems.
+         */
+
+        (function () {
+            const canvas = document.getElementById('stageCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // UI Elements
+            const climaxOverlay = document.getElementById('climaxOverlay');
+            const backstageTrigger = document.getElementById('backstage-trigger');
+            const backstageConsole = document.getElementById('backstage-console');
+            const btnCloseConsole = document.getElementById('btn-close-console');
+            const btnFullscreen = document.getElementById('btn-fullscreen');
+            const flameSlider = document.getElementById('flame-slider');
+            const intensityValue = document.getElementById('intensity-value');
+            const stageStatusText = document.getElementById('stage-status-text');
+            const statusDot = document.getElementById('status-dot');
+            const presetButtons = document.querySelectorAll('.preset-btn');
+            const audioToggle = document.getElementById('audio-toggle');
+            const toastMsg = document.getElementById('toast-msg');
+
+            // Application State
+            let width = 0;
+            let height = 0;
+            let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+            let targetIntensity = 0;   // 0.0 to 1.0 (controlled by operator)
+            let currentIntensity = 0;  // 0.0 to 1.0 (smoothly animated)
+            let isConsoleOpen = false;
+            let isClimaxActive = false;
+            let time = 0;
+
+            // Particle Pools
+            const fireParticles = [];
+            const emberParticles = [];
+            const ambientParticles = [];
+            const burstParticles = [];
+
+            // Cauldron Geometry Anchor (calculated dynamically on resize)
+            const cauldron = {
+                cx: 0,
+                rimY: 0,
+                rimWidth: 0,
+                rimHeight: 0,
+                bowlBottomY: 0,
+                baseY: 0
+            };
+
+            // Optional Web Audio Synthesizer for Ceremonial Flame Rumble & Chime
+            let audioCtx = null;
+            let fireNoiseNode = null;
+            let fireFilterNode = null;
+            let fireGainNode = null;
+            let isAudioEnabled = false;
+
+            /**
+             * Display non-intrusive status message
+             */
+            function showToast(text) {
+                toastMsg.textContent = text;
+                toastMsg.classList.remove('opacity-0');
+                clearTimeout(showToast._timer);
+                showToast._timer = setTimeout(() => {
+                    toastMsg.classList.add('opacity-0');
+                }, 2400);
+            }
+
+            /**
+             * Initialize Web Audio API procedural fire rumble + climax bell
+             */
+            function initAudio() {
+                if (audioCtx) return;
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    audioCtx = new AudioContext();
+
+                    // Create brown-ish noise buffer for realistic roaring flame sound
+                    const bufferSize = audioCtx.sampleRate * 2;
+                    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                    const output = noiseBuffer.getChannelData(0);
+                    let lastOut = 0.0;
+                    for (let i = 0; i < bufferSize; i++) {
+                        const white = Math.random() * 2 - 1;
+                        output[i] = (lastOut + (0.04 * white)) / 1.04;
+                        lastOut = output[i];
+                        output[i] *= 2.5;
+                    }
+
+                    fireNoiseNode = audioCtx.createBufferSource();
+                    fireNoiseNode.buffer = noiseBuffer;
+                    fireNoiseNode.loop = true;
+
+                    fireFilterNode = audioCtx.createBiquadFilter();
+                    fireFilterNode.type = 'lowpass';
+                    fireFilterNode.frequency.value = 120;
+
+                    fireGainNode = audioCtx.createGain();
+                    fireGainNode.gain.value = 0;
+
+                    fireNoiseNode.connect(fireFilterNode);
+                    fireFilterNode.connect(fireGainNode);
+                    fireGainNode.connect(audioCtx.destination);
+                    fireNoiseNode.start();
+                } catch (e) {
+                    console.warn('Web Audio not supported:', e);
+                }
+            }
+
+            /**
+             * Play harmonic ceremonial chime when reaching 95%+ peak climax
+             */
+            function playClimaxChime() {
+                if (!isAudioEnabled || !audioCtx) return;
+                try {
+                    if (audioCtx.state === 'suspended') audioCtx.resume();
+                    const freqs = [261.63, 329.63, 392.00, 523.25, 659.25]; // C Major 9th warm chord
+                    freqs.forEach((freq, idx) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+                        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                        gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.045 / (idx * 0.4 + 1), audioCtx.currentTime + 0.15 + idx * 0.06);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 3.8);
+
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(audioCtx.currentTime + idx * 0.05);
+                        osc.stop(audioCtx.currentTime + 4.0);
+                    });
+                } catch (e) {
+                    // Ignore audio errors
+                }
+            }
+
+            /**
+             * Resize canvas smoothly and recalculate responsive stage proportions
+             */
+            function resizeCanvas() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+                canvas.width = Math.floor(width * dpr);
+                canvas.height = Math.floor(height * dpr);
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+                // Responsive cauldron positioning (centered horizontally, lower-middle vertically
+                // so the tallest flame has generous headroom)
+                const minDim = Math.min(width, height);
+                cauldron.cx = width * 0.5;
+                cauldron.rimY = height * 0.66;
+                cauldron.rimWidth = Math.max(130, Math.min(280, minDim * 0.34));
+                cauldron.rimHeight = cauldron.rimWidth * 0.22;
+                cauldron.bowlBottomY = cauldron.rimY + cauldron.rimWidth * 0.46;
+                cauldron.baseY = height * 0.94;
+
+                // Seed ambient dust particles if empty
+                if (ambientParticles.length === 0) {
+                    for (let i = 0; i < 65; i++) {
+                        ambientParticles.push({
+                            x: Math.random() * width,
+                            y: Math.random() * height,
+                            r: Math.random() * 2.2 + 0.6,
+                            vx: (Math.random() - 0.5) * 0.25,
+                            vy: -Math.random() * 0.35 - 0.1,
+                            alpha: Math.random() * 0.6 + 0.2,
+                            phase: Math.random() * Math.PI * 2
+                        });
+                    }
+                }
+            }
+
+            /**
+             * Update target fire percentage (0 - 100) and sync UI
+             */
+            function setFireLevel(percent) {
+                const clamped = Math.max(0, Math.min(100, Math.round(percent)));
+                targetIntensity = clamped / 100;
+                flameSlider.value = clamped;
+                intensityValue.textContent = clamped;
+
+                // Update Backstage Status Indicator
+                if (clamped === 0) {
+                    stageStatusText.textContent = 'Standby — Cauldron Unlit';
+                    statusDot.className = 'w-2.5 h-2.5 rounded-full bg-slate-500';
+                } else if (clamped < 40) {
+                    stageStatusText.textContent = 'Ignited — Gentle Ceremonial Flame';
+                    statusDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse';
+                } else if (clamped < 95) {
+                    stageStatusText.textContent = 'Rising — Building Anticipation';
+                    statusDot.className = 'w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse';
+                } else {
+                    stageStatusText.textContent = 'PEAK CLIMAX — Slogan Revealed';
+                    statusDot.className = 'w-2.5 h-2.5 rounded-full bg-yellow-300 shadow-[0_0_8px_#fde047] animate-ping';
+                }
+            }
+
+            /**
+             * Toggle Backstage Console visibility
+             */
+            function toggleConsole(forceState) {
+                isConsoleOpen = typeof forceState === 'boolean' ? forceState : !isConsoleOpen;
+                if (isConsoleOpen) {
+                    backstageConsole.classList.remove('translate-y-4', 'opacity-0', 'pointer-events-none');
+                    backstageConsole.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+                } else {
+                    backstageConsole.classList.add('translate-y-4', 'opacity-0', 'pointer-events-none');
+                    backstageConsole.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+                }
+            }
+
+            /**
+             * Toggle Fullscreen mode cleanly
+             */
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(() => {
+                        showToast('Fullscreen blocked by browser preview frame');
+                    });
+                } else {
+                    document.exitFullscreen().catch(() => {});
+                }
+            }
+
+            /**
+             * Spawn celebratory gold sparkles across the screen when Climax hits
+             */
+            function triggerCelebrationBurst() {
+                for (let i = 0; i < 90; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 5.5 + 1.5;
+                    burstParticles.push({
+                        x: cauldron.cx + (Math.random() - 0.5) * cauldron.rimWidth * 0.7,
+                        y: cauldron.rimY - height * 0.14,
+                        vx: Math.cos(angle) * speed * 1.4,
+                        vy: Math.sin(angle) * speed - 2.2,
+                        size: Math.random() * 3.5 + 1.5,
+                        life: 1.0,
+                        decay: Math.random() * 0.012 + 0.008,
+                        hue: 38 + Math.random() * 16
+                    });
+                }
+            }
+
+            /**
+             * Spawn realistic fire plasma particles from the cauldron basin
+             */
+            function spawnFireParticles() {
+                if (currentIntensity <= 0.005) return;
+
+                // Number of flame particles scales with intensity
+                const count = Math.ceil(6 + currentIntensity * 22);
+                const maxFlameHeight = height * (0.14 + Math.pow(currentIntensity, 1.15) * 0.42);
+                const baseSpread = cauldron.rimWidth * (0.34 + currentIntensity * 0.12);
+
+                for (let i = 0; i < count; i++) {
+                    // Gaussian-like distribution concentrated near center of cauldron
+                    const r1 = (Math.random() - 0.5) + (Math.random() - 0.5);
+                    const offsetX = r1 * baseSpread;
+                    const centerProximity = 1 - Math.min(1, Math.abs(offsetX) / (baseSpread * 1.1));
+
+                    const upwardSpeed = (2.4 + currentIntensity * 5.8) * (0.75 + centerProximity * 0.55) * (0.85 + Math.random() * 0.35);
+                    const lifeSpan = (maxFlameHeight / upwardSpeed) / 60; // in seconds approx
+
+                    fireParticles.push({
+                        x: cauldron.cx + offsetX,
+                        y: cauldron.rimY + (Math.random() - 0.5) * 6,
+                        vx: (Math.random() - 0.5) * (0.8 + currentIntensity * 1.1) - offsetX * 0.012,
+                        vy: -upwardSpeed,
+                        radius: (cauldron.rimWidth * (0.13 + currentIntensity * 0.11)) * (0.7 + centerProximity * 0.5),
+                        life: 1.0,
+                        decay: (1 / Math.max(18, lifeSpan * 58)) * (0.85 + Math.random() * 0.35),
+                        turbulenceSeed: Math.random() * 100,
+                        isCore: centerProximity > 0.55 && Math.random() < 0.55
+                    });
+                }
+
+                // Spawn glowing embers / sparks
+                const emberCount = Math.floor(currentIntensity * 5);
+                for (let i = 0; i < emberCount; i++) {
+                    if (Math.random() < 0.65) {
+                        emberParticles.push({
+                            x: cauldron.cx + (Math.random() - 0.5) * cauldron.rimWidth * 0.85,
+                            y: cauldron.rimY - Math.random() * 20,
+                            vx: (Math.random() - 0.5) * 2.4,
+                            vy: -(2.5 + Math.random() * 5.0 * (0.4 + currentIntensity)),
+                            size: Math.random() * 2.6 + 1.0,
+                            life: 1.0,
+                            decay: Math.random() * 0.014 + 0.008,
+                            wobble: Math.random() * Math.PI * 2
+                        });
+                    }
+                }
+            }
+
+            /**
+             * Draw Layer A & B: Ceremonial Stage Backdrop, Warm Illumination & Columns
+             */
+            function drawStageEnvironment() {
+                // 1. Base Sky/Stage Gradient (shifts from royal midnight blue to warm ceremonial gold-crimson as fire rises)
+                const bgGrad = ctx.createRadialGradient(
+                    cauldron.cx, cauldron.rimY - height * 0.12, 10,
+                    cauldron.cx, cauldron.rimY, Math.max(width, height) * 0.85
+                );
+
+                // Interpolate colors based on currentIntensity
+                const warmBoost = currentIntensity;
+                bgGrad.addColorStop(0, `rgba(${Math.round(30 + warmBoost * 195)}, ${Math.round(45 + warmBoost * 95)}, ${Math.round(85 - warmBoost * 55)}, 1)`);
+                bgGrad.addColorStop(0.38, `rgba(${Math.round(15 + warmBoost * 110)}, ${Math.round(25 + warmBoost * 42)}, ${Math.round(58 - warmBoost * 35)}, 1)`);
+                bgGrad.addColorStop(0.75, `rgba(${Math.round(8 + warmBoost * 35)}, ${Math.round(14 + warmBoost * 12)}, ${Math.round(34 - warmBoost * 18)}, 1)`);
+                bgGrad.addColorStop(1, '#02050e');
+
+                ctx.fillStyle = bgGrad;
+                ctx.fillRect(0, 0, width, height);
+
+                // 2. Subtle Ceremonial Architectural Pillars (Left & Right Stage Wings)
+                const pillarCount = 4;
+                const sideMargin = width * 0.06;
+                const pillarSpan = width * 0.18;
+
+                for (let side of [-1, 1]) {
+                    for (let i = 0; i < pillarCount; i++) {
+                        const ratio = i / (pillarCount - 1);
+                        const px = side === -1
+                            ? sideMargin + ratio * pillarSpan
+                            : width - sideMargin - ratio * pillarSpan;
+                        const pWidth = Math.max(10, width * 0.016 * (1 - ratio * 0.25));
+                        const pTop = height * (0.06 + ratio * 0.05);
+                        const pBottom = height * (0.86 - ratio * 0.04);
+
+                        const pGrad = ctx.createLinearGradient(px - pWidth, 0, px + pWidth, 0);
+                        const edgeGlow = 0.08 + currentIntensity * 0.22;
+                        pGrad.addColorStop(0, 'rgba(5, 10, 24, 0.75)');
+                        pGrad.addColorStop(0.5, `rgba(${Math.round(40 + currentIntensity * 140)}, ${Math.round(55 + currentIntensity * 85)}, ${Math.round(95 - currentIntensity * 40)}, ${0.22 + currentIntensity * 0.2})`);
+                        pGrad.addColorStop(1, `rgba(253, 224, 71, ${side === -1 ? edgeGlow : 0.04})`);
+
+                        ctx.fillStyle = pGrad;
+                        ctx.fillRect(px - pWidth / 2, pTop, pWidth, pBottom - pTop);
+                    }
+                }
+
+                // 3. Sweeping Golden Amphitheater Light Arcs on Stage Floor
+                ctx.save();
+                const horizonY = cauldron.rimY + cauldron.rimWidth * 0.38;
+                for (let arc = 0; arc < 3; arc++) {
+                    ctx.beginPath();
+                    const yOffset = arc * (height * 0.035);
+                    ctx.moveTo(0, horizonY - height * 0.06 + yOffset);
+                    ctx.quadraticCurveTo(
+                        cauldron.cx, horizonY + height * 0.08 + yOffset,
+                        width, horizonY - height * 0.06 + yOffset
+                    );
+                    ctx.strokeStyle = `rgba(251, 191, 36, ${0.12 + currentIntensity * 0.28 - arc * 0.03})`;
+                    ctx.lineWidth = 2 - arc * 0.4;
+                    ctx.stroke();
+                }
+
+                // Stage Platform Reflection Pool beneath Cauldron
+                const floorGrad = ctx.createRadialGradient(
+                    cauldron.cx, cauldron.baseY, 10,
+                    cauldron.cx, cauldron.baseY, width * 0.48
+                );
+                floorGrad.addColorStop(0, `rgba(251, 191, 36, ${0.08 + currentIntensity * 0.38})`);
+                floorGrad.addColorStop(0.5, `rgba(180, 83, 9, ${0.04 + currentIntensity * 0.15})`);
+                floorGrad.addColorStop(1, 'rgba(2, 6, 23, 0)');
+                ctx.fillStyle = floorGrad;
+                ctx.fillRect(0, horizonY, width, height - horizonY);
+                ctx.restore();
+            }
+
+            /**
+             * Draw Layer C: Floating Ambient Ceremonial Light Motes
+             */
+            function drawAmbientParticles() {
+                ctx.save();
+                for (let p of ambientParticles) {
+                    p.x += p.vx + Math.sin(time * 0.8 + p.phase) * 0.15;
+                    p.y += p.vy * (1 + currentIntensity * 1.4);
+
+                    if (p.y < -10) {
+                        p.y = height + 10;
+                        p.x = Math.random() * width;
+                    }
+                    if (p.x < -10) p.x = width + 10;
+                    if (p.x > width + 10) p.x = -10;
+
+                    const twinkle = 0.5 + 0.5 * Math.sin(time * 2.2 + p.phase);
+                    const alpha = p.alpha * twinkle * (0.35 + currentIntensity * 0.65);
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r * (1 + currentIntensity * 0.35), 0, Math.PI * 2);
+                    ctx.fillStyle = currentIntensity > 0.5
+                        ? `rgba(253, 224, 71, ${alpha})`
+                        : `rgba(186, 230, 253, ${alpha * 0.7})`;
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            /**
+             * Draw Layer D & E: Dynamic Additive Fire & Rising Glowing Sparks
+             */
+            function drawFireAndEmbers() {
+                if (currentIntensity > 0.005) {
+                    // Outer Atmospheric Fire Halo
+                    const haloRadius = cauldron.rimWidth * (0.9 + currentIntensity * 2.4);
+                    const haloY = cauldron.rimY - haloRadius * 0.42;
+                    const haloGrad = ctx.createRadialGradient(
+                        cauldron.cx, haloY, cauldron.rimWidth * 0.1,
+                        cauldron.cx, haloY, haloRadius
+                    );
+                    haloGrad.addColorStop(0, `rgba(255, 220, 120, ${0.22 * currentIntensity})`);
+                    haloGrad.addColorStop(0.45, `rgba(245, 110, 15, ${0.15 * currentIntensity})`);
+                    haloGrad.addColorStop(1, 'rgba(234, 88, 12, 0)');
+
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'screen';
+                    ctx.fillStyle = haloGrad;
+                    ctx.beginPath();
+                    ctx.arc(cauldron.cx, haloY, haloRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                // Render Fire Particles with Additive Blending ('lighter')
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+
+                for (let i = fireParticles.length - 1; i >= 0; i--) {
+                    const p = fireParticles[i];
+
+                    // Turbulent sinusoidal flame licking motion
+                    const progress = 1 - p.life;
+                    const sway = Math.sin(time * 8.5 + p.turbulenceSeed + progress * 6) * (1.2 + progress * 2.6);
+                    p.x += p.vx + sway * 0.35;
+                    p.y += p.vy;
+                    p.life -= p.decay;
+
+                    // Taper flame radius as it rises
+                    const currentRadius = p.radius * Math.pow(Math.max(0.05, p.life), 0.68);
+
+                    if (p.life <= 0 || currentRadius <= 0.5) {
+                        fireParticles.splice(i, 1);
+                        continue;
+                    }
+
+                    const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, currentRadius);
+
+                    if (p.isCore && p.life > 0.45) {
+                        // White-gold ultra-hot inner flame core
+                        grad.addColorStop(0, `rgba(255, 253, 235, ${p.life * 0.85})`);
+                        grad.addColorStop(0.35, `rgba(254, 215, 102, ${p.life * 0.65})`);
+                        grad.addColorStop(0.75, `rgba(249, 115, 22, ${p.life * 0.32})`);
+                        grad.addColorStop(1, 'rgba(220, 38, 38, 0)');
+                    } else {
+                        // Rich amber-orange-crimson outer flame tongues
+                        grad.addColorStop(0, `rgba(253, 186, 116, ${p.life * 0.62})`);
+                        grad.addColorStop(0.45, `rgba(245, 100, 15, ${p.life * 0.44})`);
+                        grad.addColorStop(0.8, `rgba(185, 28, 28, ${p.life * 0.2})`);
+                        grad.addColorStop(1, 'rgba(127, 29, 29, 0)');
+                    }
+
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, currentRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Render Rising Embers / Sparks
+                for (let i = emberParticles.length - 1; i >= 0; i--) {
+                    const e = emberParticles[i];
+                    e.wobble += 0.14;
+                    e.x += e.vx + Math.sin(e.wobble) * 0.9;
+                    e.y += e.vy;
+                    e.vy *= 0.992;
+                    e.life -= e.decay;
+
+                    if (e.life <= 0) {
+                        emberParticles.splice(i, 1);
+                        continue;
+                    }
+
+                    ctx.fillStyle = `rgba(254, 240, 138, ${e.life * 0.95})`;
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, e.size * e.life, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Render Climax Celebration Sparks
+                for (let i = burstParticles.length - 1; i >= 0; i--) {
+                    const b = burstParticles[i];
+                    b.x += b.vx;
+                    b.y += b.vy;
+                    b.vy += 0.06; // subtle gravity
+                    b.vx *= 0.985;
+                    b.life -= b.decay;
+
+                    if (b.life <= 0) {
+                        burstParticles.splice(i, 1);
+                        continue;
+                    }
+
+                    ctx.fillStyle = `hsla(${b.hue}, 100%, 72%, ${b.life})`;
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, b.size * b.life, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            }
+
+            /**
+             * Draw Layer F: Sculpted Metallic Olympic Flame Cauldron & Fluted Pedestal
+             * Includes real-time specular reflections driven by `currentIntensity`
+             */
+            function drawCauldron() {
+                const { cx, rimY, rimWidth, rimHeight, bowlBottomY, baseY } = cauldron;
+                const halfW = rimWidth * 0.5;
+                const neckW = rimWidth * 0.25;
+                const pedestalTopY = bowlBottomY - rimHeight * 0.15;
+
+                ctx.save();
+
+                // 1. Fluted Ceremonial Pedestal Column
+                const pedGrad = ctx.createLinearGradient(cx - neckW * 1.15, 0, cx + neckW * 1.15, 0);
+                pedGrad.addColorStop(0, '#0f172a');
+                pedGrad.addColorStop(0.22, '#334155');
+                pedGrad.addColorStop(0.5, `rgb(${Math.round(95 + currentIntensity * 120)}, ${Math.round(105 + currentIntensity * 85)}, ${Math.round(125 + currentIntensity * 20)})`);
+                pedGrad.addColorStop(0.78, '#334155');
+                pedGrad.addColorStop(1, '#090d16');
+
+                ctx.fillStyle = pedGrad;
+                ctx.beginPath();
+                ctx.moveTo(cx - neckW, pedestalTopY);
+                ctx.lineTo(cx + neckW, pedestalTopY);
+                ctx.lineTo(cx + neckW * 1.28, baseY);
+                ctx.lineTo(cx - neckW * 1.28, baseY);
+                ctx.closePath();
+                ctx.fill();
+
+                // Vertical Fluted Ribs on Pedestal
+                const fluteCount = 7;
+                for (let i = 0; i < fluteCount; i++) {
+                    const t = (i / (fluteCount - 1)) * 2 - 1; // -1 to 1
+                    const topX = cx + t * neckW * 0.85;
+                    const botX = cx + t * neckW * 1.1;
+
+                    ctx.beginPath();
+                    ctx.moveTo(topX, pedestalTopY + 4);
+                    ctx.lineTo(botX, baseY);
+                    ctx.strokeStyle = i % 2 === 0
+                        ? `rgba(253, 224, 71, ${0.12 + currentIntensity * 0.35})`
+                        : 'rgba(2, 6, 23, 0.65)';
+                    ctx.lineWidth = Math.max(1.5, rimWidth * 0.012);
+                    ctx.stroke();
+                }
+
+                // Pedestal Tiered Base Plinth
+                const plinthW = neckW * 1.65;
+                const plinthH = Math.max(12, rimHeight * 0.45);
+                const plinthGrad = ctx.createLinearGradient(cx - plinthW, 0, cx + plinthW, 0);
+                plinthGrad.addColorStop(0, '#090d16');
+                plinthGrad.addColorStop(0.5, `rgb(${Math.round(70 + currentIntensity * 130)}, ${Math.round(75 + currentIntensity * 85)}, ${Math.round(90 + currentIntensity * 10)})`);
+                plinthGrad.addColorStop(1, '#090d16');
+
+                ctx.fillStyle = plinthGrad;
+                ctx.beginPath();
+                ctx.roundRect(cx - plinthW, baseY - plinthH, plinthW * 2, plinthH, 4);
+                ctx.fill();
+
+                // 2. Sculpted Cauldron Bowl Exterior
+                ctx.beginPath();
+                ctx.moveTo(cx - halfW, rimY);
+                ctx.bezierCurveTo(
+                    cx - halfW * 0.96, bowlBottomY - rimHeight * 0.4,
+                    cx - neckW * 1.35, bowlBottomY,
+                    cx - neckW, bowlBottomY
+                );
+                ctx.lineTo(cx + neckW, bowlBottomY);
+                ctx.bezierCurveTo(
+                    cx + neckW * 1.35, bowlBottomY,
+                    cx + halfW * 0.96, bowlBottomY - rimHeight * 0.4,
+                    cx + halfW, rimY
+                );
+                ctx.closePath();
+
+                // Metallic Gradient reacting to Fire Light
+                const bowlGrad = ctx.createLinearGradient(cx - halfW, rimY, cx + halfW, bowlBottomY);
+                bowlGrad.addColorStop(0, '#1e293b');
+                bowlGrad.addColorStop(0.2, `rgb(${Math.round(75 + currentIntensity * 115)}, ${Math.round(85 + currentIntensity * 75)}, ${Math.round(105 + currentIntensity * 10)})`);
+                bowlGrad.addColorStop(0.5, `rgb(${Math.round(130 + currentIntensity * 125)}, ${Math.round(140 + currentIntensity * 95)}, ${Math.round(160 + currentIntensity * 30)})`);
+                bowlGrad.addColorStop(0.82, `rgb(${Math.round(55 + currentIntensity * 110)}, ${Math.round(65 + currentIntensity * 60)}, ${Math.round(85 - currentIntensity * 20)})`);
+                bowlGrad.addColorStop(1, '#0f172a');
+
+                ctx.fillStyle = bowlGrad;
+                ctx.fill();
+
+                // Warm Under-Rim Reflection Band on Bowl
+                if (currentIntensity > 0.02) {
+                    const warmGlowGrad = ctx.createRadialGradient(
+                        cx, rimY + rimHeight * 0.3, halfW * 0.1,
+                        cx, rimY + rimHeight * 0.5, halfW * 0.95
+                    );
+                    warmGlowGrad.addColorStop(0, `rgba(254, 240, 138, ${currentIntensity * 0.55})`);
+                    warmGlowGrad.addColorStop(0.6, `rgba(245, 158, 11, ${currentIntensity * 0.32})`);
+                    warmGlowGrad.addColorStop(1, 'rgba(245, 158, 11, 0)');
+                    ctx.fillStyle = warmGlowGrad;
+                    ctx.fill();
+                }
+
+                // Decorative Gold Ceremonial Ring Band around Upper Bowl
+                ctx.beginPath();
+                ctx.ellipse(cx, rimY + rimHeight * 0.65, halfW * 0.93, rimHeight * 0.38, 0, 0.08 * Math.PI, 0.92 * Math.PI);
+                ctx.strokeStyle = `rgba(251, 191, 36, ${0.35 + currentIntensity * 0.65})`;
+                ctx.lineWidth = Math.max(2, rimWidth * 0.015);
+                ctx.stroke();
+
+                // 3. Cauldron Top Rim & Inner Basin
+                // Outer Rim Lip
+                ctx.beginPath();
+                ctx.ellipse(cx, rimY, halfW, rimHeight * 0.5, 0, 0, Math.PI * 2);
+                const rimLipGrad = ctx.createLinearGradient(cx - halfW, rimY, cx + halfW, rimY);
+                rimLipGrad.addColorStop(0, '#334155');
+                rimLipGrad.addColorStop(0.25, '#cbd5e1');
+                rimLipGrad.addColorStop(0.5, currentIntensity > 0.1 ? '#fef08a' : '#f8fafc');
+                rimLipGrad.addColorStop(0.75, '#cbd5e1');
+                rimLipGrad.addColorStop(1, '#1e293b');
+                ctx.fillStyle = rimLipGrad;
+                ctx.fill();
+
+                // Inner Dark/Glowing Basin
+                ctx.beginPath();
+                ctx.ellipse(cx, rimY + 1, halfW * 0.91, rimHeight * 0.38, 0, 0, Math.PI * 2);
+                const basinGrad = ctx.createRadialGradient(cx, rimY + 1, 2, cx, rimY + 1, halfW * 0.9);
+                if (currentIntensity > 0.02) {
+                    basinGrad.addColorStop(0, `rgba(255, 255, 224, ${0.4 + currentIntensity * 0.6})`);
+                    basinGrad.addColorStop(0.5, `rgba(245, 158, 11, ${0.3 + currentIntensity * 0.7})`);
+                    basinGrad.addColorStop(1, '#451a03');
+                } else {
+                    basinGrad.addColorStop(0, '#020617');
+                    basinGrad.addColorStop(1, '#0f172a');
+                }
+                ctx.fillStyle = basinGrad;
+                ctx.fill();
+
+                // Front Rim Lip Highlight (overlaps bottom of flame slightly for 3D depth)
+                ctx.beginPath();
+                ctx.ellipse(cx, rimY, halfW, rimHeight * 0.5, 0, 0.05 * Math.PI, 0.95 * Math.PI);
+                ctx.strokeStyle = `rgba(254, 249, 195, ${0.45 + currentIntensity * 0.55})`;
+                ctx.lineWidth = Math.max(2, rimWidth * 0.016);
+                ctx.stroke();
+
+                ctx.restore();
+            }
+
+            /**
+             * Main Animation Loop
+             */
+            function animate() {
+                time += 0.016;
+
+                // Smoothly interpolate currentIntensity towards targetIntensity
+                const diff = targetIntensity - currentIntensity;
+                if (Math.abs(diff) > 0.0005) {
+                    currentIntensity += diff * 0.065;
+                } else {
+                    currentIntensity = targetIntensity;
+                }
+
+                // Update Web Audio procedural fire sound if enabled
+                if (isAudioEnabled && audioCtx && fireGainNode && fireFilterNode) {
+                    if (audioCtx.state === 'suspended') audioCtx.resume();
+                    fireGainNode.gain.setTargetAtTime(currentIntensity * 0.38, audioCtx.currentTime, 0.1);
+                    fireFilterNode.frequency.setTargetAtTime(90 + currentIntensity * 340, audioCtx.currentTime, 0.1);
+                }
+
+                // Check Peak Climax Threshold (95% - 100%)
+                const shouldShowClimax = currentIntensity >= 0.945;
+                if (shouldShowClimax && !isClimaxActive) {
+                    isClimaxActive = true;
+                    climaxOverlay.classList.add('active');
+                    triggerCelebrationBurst();
+                    playClimaxChime();
+                } else if (!shouldShowClimax && isClimaxActive) {
+                    isClimaxActive = false;
+                    climaxOverlay.classList.remove('active');
+                }
+
+                // Spawn new fire & ember particles
+                spawnFireParticles();
+
+                // Render Layered Scene
+                drawStageEnvironment();
+                drawAmbientParticles();
+                drawFireAndEmbers();
+                drawCauldron();
+
+                requestAnimationFrame(animate);
+            }
+
+            // =========================================================================
+            // EVENT LISTENERS & BACKSTAGE CONTROLS
+            // =========================================================================
+
+            window.addEventListener('resize', resizeCanvas);
+
+            // Toggle backstage panel via discreet corner button
+            backstageTrigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleConsole();
+            });
+
+            btnCloseConsole.addEventListener('click', () => toggleConsole(false));
+            btnFullscreen.addEventListener('click', toggleFullscreen);
+
+            // Slider real-time control
+            flameSlider.addEventListener('input', (e) => {
+                setFireLevel(parseInt(e.target.value, 10));
+            });
+
+            // Quick Stage Cue Presets
+            presetButtons.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const level = parseInt(btn.getAttribute('data-preset'), 10);
+                    setFireLevel(level);
+                });
+            });
+
+            // Ceremonial Audio Toggle
+            audioToggle.addEventListener('change', (e) => {
+                isAudioEnabled = e.target.checked;
+                if (isAudioEnabled) {
+                    initAudio();
+                    if (audioCtx && audioCtx.state === 'suspended') {
+                        audioCtx.resume();
+                    }
+                    showToast('Ceremonial Fire Audio Enabled');
+                } else if (fireGainNode && audioCtx) {
+                    fireGainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
+                }
+            });
+
+            // Keyboard Shortcuts for Live Stage Operator
+            window.addEventListener('keydown', (e) => {
+                // 'C' key toggles backstage control panel
+                if (e.key === 'c' || e.key === 'C') {
+                    e.preventDefault();
+                    toggleConsole();
+                    return;
+                }
+
+                // 'F' key toggles fullscreen
+                if (e.key === 'f' || e.key === 'F') {
+                    e.preventDefault();
+                    toggleFullscreen();
+                    return;
+                }
+
+                // Up/Down arrows adjust fire intensity smoothly by 5%
+                const currentPercent = Math.round(targetIntensity * 100);
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    setFireLevel(currentPercent + 5);
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    setFireLevel(currentPercent - 5);
+                } else if (e.code === 'Space') {
+                    // Spacebar advances through dramatic ceremony cues: 0% -> 30% -> 65% -> 100%
+                    e.preventDefault();
+                    if (currentPercent < 25) setFireLevel(30);
+                    else if (currentPercent < 60) setFireLevel(65);
+                    else if (currentPercent < 95) setFireLevel(100);
+                    else setFireLevel(0);
+                }
+            });
+
+            // Initialize dimensions and start render loop on window load
+            window.onload = function () {
+                resizeCanvas();
+                setFireLevel(0);
+                animate();
+            };
+        })();
+    </script>
+</body>
+</html>
