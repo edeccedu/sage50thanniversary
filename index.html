@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stage Display - 50th Anniversary 3D Ceremonial Cauldron</title>
+  <title>Stage Display - 50th Anniversary Olympic Ceremonial Cauldron</title>
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: #030101;
+      background-color: #120914;
       color: #fff;
       font-family: 'Noto Serif TC', 'Songti TC', 'PMingLiU', 'PingFang HK', serif;
       overflow: hidden;
@@ -25,11 +25,11 @@
       z-index: 1;
     }
 
-    /* Broadcast Vignette & Subtle Arena Depth */
+    /* Subtle edge framing that keeps the center bright and clear */
     .cinema-vignette {
       position: fixed;
       inset: 0;
-      background: radial-gradient(circle at 50% 48%, transparent 52%, rgba(0, 0, 0, 0.78) 100%);
+      background: radial-gradient(circle at 50% 50%, transparent 65%, rgba(6, 2, 8, 0.55) 100%);
       pointer-events: none;
       z-index: 2;
     }
@@ -62,11 +62,11 @@
     }
 
     .slogan-plaque {
-      background: linear-gradient(180deg, rgba(28, 6, 6, 0.86) 0%, rgba(12, 3, 3, 0.92) 100%);
-      border-top: 2px solid rgba(255, 218, 110, 0.85);
-      border-bottom: 2px solid rgba(255, 218, 110, 0.85);
+      background: linear-gradient(180deg, rgba(42, 8, 10, 0.88) 0%, rgba(18, 4, 6, 0.92) 100%);
+      border-top: 2.5px solid rgba(255, 222, 115, 0.9);
+      border-bottom: 2.5px solid rgba(255, 222, 115, 0.9);
       padding: 1.6vh 4vw;
-      box-shadow: 0 14px 45px rgba(0, 0, 0, 0.9), inset 0 0 30px rgba(255, 190, 50, 0.22);
+      box-shadow: 0 14px 45px rgba(0, 0, 0, 0.75), inset 0 0 30px rgba(255, 195, 60, 0.25);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -89,8 +89,8 @@
       position: fixed;
       top: 16px;
       left: 16px;
-      background: rgba(18, 9, 9, 0.92);
-      border: 1px solid rgba(255, 215, 0, 0.5);
+      background: rgba(20, 10, 14, 0.92);
+      border: 1px solid rgba(255, 215, 0, 0.55);
       color: #ffd700;
       padding: 12px 16px;
       border-radius: 8px;
@@ -106,7 +106,6 @@
     }
   </style>
 
-  <!-- Three.js & Post-Processing Import Map -->
   <script type="importmap">
     {
       "imports": {
@@ -168,7 +167,6 @@
     import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
     import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-    // --- State & Sync Setup ---
     let heatValue = 0;
     let targetHeat = 0;
 
@@ -226,32 +224,115 @@
     // --- Three.js Scene, Camera & Renderer ---
     const container = document.getElementById('webgl-container');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x040203);
-    scene.fog = new THREE.FogExp2(0x060203, 0.032);
 
-    const camera = new THREE.PerspectiveCamera(36, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 3.6, 15.2);
+    const camera = new THREE.PerspectiveCamera(36, window.innerWidth / window.innerHeight, 0.1, 120);
+    camera.position.set(0, 3.8, 15.2);
     camera.lookAt(0, 3.3, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMappingExposure = 1.35;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
 
-    // --- Post-Processing Bloom for Broadcast Glow ---
+    // --- Custom Stadium Reflection Environment Map (Makes Gold & Crimson Gleam Even at 0% Fire) ---
+    function buildArenaEnvironment() {
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      const envScene = new THREE.Scene();
+
+      // Warm ceremonial sky dome
+      const dome = new THREE.Mesh(
+        new THREE.SphereGeometry(40, 32, 16),
+        new THREE.MeshBasicMaterial({ color: 0x3b1824, side: THREE.BackSide })
+      );
+      envScene.add(dome);
+
+      // Simulated overhead stadium floodlight banks so metallic surfaces have crisp specular reflections
+      const lightPanelMat = new THREE.MeshBasicMaterial({ color: 0xfff2d6 });
+      [
+        [-14, 18, 12], [14, 18, 12], [0, 22, 10],
+        [-18, 14, -10], [18, 14, -10], [0, 12, 18]
+      ].forEach(([lx, ly, lz]) => {
+        const panel = new THREE.Mesh(new THREE.PlaneGeometry(8, 4), lightPanelMat);
+        panel.position.set(lx, ly, lz);
+        panel.lookAt(0, 3, 0);
+        envScene.add(panel);
+      });
+
+      const envRT = pmrem.fromScene(envScene, 0.04);
+      scene.environment = envRT.texture;
+      pmrem.dispose();
+    }
+    buildArenaEnvironment();
+
+    // --- Ceremonial Arena Sky & Backdrop Dome ---
+    function createArenaBackdropTexture() {
+      const c = document.createElement('canvas');
+      c.width = 1024;
+      c.height = 512;
+      const ctx = c.getContext('2d');
+
+      // Rich ceremonial twilight royal-purple to crimson-gold horizon
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, 512);
+      skyGrad.addColorStop(0.0, '#121830');
+      skyGrad.addColorStop(0.42, '#281836');
+      skyGrad.addColorStop(0.72, '#4f1b24');
+      skyGrad.addColorStop(1.0, '#240c10');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, 1024, 512);
+
+      // Radiant warm golden aura behind the cauldron center
+      const centerGlow = ctx.createRadialGradient(512, 310, 20, 512, 310, 380);
+      centerGlow.addColorStop(0, 'rgba(255, 200, 120, 0.42)');
+      centerGlow.addColorStop(0.5, 'rgba(180, 60, 45, 0.18)');
+      centerGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = centerGlow;
+      ctx.fillRect(0, 0, 1024, 512);
+
+      // Subtle stadium architectural arch lines & glowing crowd lights
+      ctx.strokeStyle = 'rgba(255, 220, 150, 0.12)';
+      ctx.lineWidth = 2;
+      for (let y = 260; y < 480; y += 22) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.quadraticCurveTo(512, y - 18, 1024, y);
+        ctx.stroke();
+      }
+
+      // Soft twinkling audience/stadium lights in the tiers
+      for (let i = 0; i < 240; i++) {
+        const sx = Math.random() * 1024;
+        const sy = 250 + Math.random() * 210;
+        const r = Math.random() * 1.8 + 0.6;
+        ctx.fillStyle = `rgba(255, 235, 185, ${Math.random() * 0.45 + 0.1})`;
+        ctx.beginPath();
+        ctx.arc(sx, sy, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    const skyDome = new THREE.Mesh(
+      new THREE.SphereGeometry(55, 48, 24),
+      new THREE.MeshBasicMaterial({ map: createArenaBackdropTexture(), side: THREE.BackSide })
+    );
+    scene.add(skyDome);
+
+    // --- Post-Processing Bloom ---
     const composer = new EffectComposer(renderer);
-    const renderPass = new RenderPass(scene, camera);
-    composer.addPass(renderPass);
+    composer.addPass(new RenderPass(scene, camera));
 
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      0.75, // bloom strength
-      0.55, // radius
-      0.78  // threshold so only fire, gold highlights & spotlights glow
+      0.68, // bloom strength
+      0.5,  // radius
+      0.82  // threshold
     );
     composer.addPass(bloomPass);
 
@@ -266,11 +347,11 @@
       bumpCanvas.width = w; bumpCanvas.height = h;
       const bCtx = bumpCanvas.getContext('2d');
 
-      // Imperial Crimson Lacquer Base
+      // Vibrant Imperial Crimson Lacquer
       const grad = cCtx.createLinearGradient(0, 0, 0, h);
-      grad.addColorStop(0, '#9e1111');
-      grad.addColorStop(0.5, '#c41818');
-      grad.addColorStop(1, '#6b0707');
+      grad.addColorStop(0, '#c41818');
+      grad.addColorStop(0.5, '#e02222');
+      grad.addColorStop(1, '#8c0c0c');
       cCtx.fillStyle = grad;
       cCtx.fillRect(0, 0, w, h);
 
@@ -278,12 +359,12 @@
       bCtx.fillRect(0, 0, w, h);
 
       // Gold Rim Bands
-      cCtx.fillStyle = '#ffd666';
-      cCtx.fillRect(0, 0, w, 28);
-      cCtx.fillRect(0, h - 24, w, 24);
+      cCtx.fillStyle = '#ffe074';
+      cCtx.fillRect(0, 0, w, 30);
+      cCtx.fillRect(0, h - 26, w, 26);
       bCtx.fillStyle = '#ffffff';
-      bCtx.fillRect(0, 0, w, 28);
-      bCtx.fillRect(0, h - 24, w, 24);
+      bCtx.fillRect(0, 0, w, 30);
+      bCtx.fillRect(0, h - 26, w, 26);
 
       // Repeating 3D Embossed Auspicious Cloud Scrolls (祥雲)
       const count = 16;
@@ -297,22 +378,19 @@
           ctx.save();
           ctx.translate(cx, cy);
           ctx.scale(flip, 1);
-          ctx.strokeStyle = idx === 0 ? '#ffdf73' : '#ffffff';
+          ctx.strokeStyle = idx === 0 ? '#ffe885' : '#ffffff';
           ctx.lineCap = 'round';
 
-          // Outer spiral
-          ctx.lineWidth = idx === 0 ? 14 : 18;
+          ctx.lineWidth = idx === 0 ? 16 : 20;
           ctx.beginPath();
           ctx.arc(0, 0, 56, 0.15 * Math.PI, 1.85 * Math.PI);
           ctx.stroke();
 
-          // Inner coil
-          ctx.lineWidth = idx === 0 ? 10 : 14;
+          ctx.lineWidth = idx === 0 ? 11 : 15;
           ctx.beginPath();
           ctx.arc(6, 0, 28, 0, 1.7 * Math.PI);
           ctx.stroke();
 
-          // Flowing cloud tail
           ctx.beginPath();
           ctx.moveTo(-56, 6);
           ctx.bezierCurveTo(-80, -35, -105, 35, -128, -4);
@@ -338,37 +416,33 @@
       const ctx = canvas.getContext('2d');
 
       const grad = ctx.createLinearGradient(0, 0, 0, 1024);
-      grad.addColorStop(0, '#cf1919');
-      grad.addColorStop(0.5, '#a80f0f');
-      grad.addColorStop(1, '#730707');
+      grad.addColorStop(0, '#e32222');
+      grad.addColorStop(0.5, '#bd1515');
+      grad.addColorStop(1, '#870b0b');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 512, 1024);
 
-      // Gold Frame
-      ctx.strokeStyle = '#ffd966';
-      ctx.lineWidth = 14;
+      ctx.strokeStyle = '#ffe074';
+      ctx.lineWidth = 16;
       ctx.strokeRect(24, 24, 464, 976);
 
-      // Emblem Circle
-      ctx.strokeStyle = '#ffe58f';
+      ctx.strokeStyle = '#ffea96';
       ctx.lineWidth = 8;
       ctx.beginPath();
       ctx.arc(256, 230, 78, 0, Math.PI * 2);
       ctx.stroke();
 
-      ctx.fillStyle = '#fff3b8';
-      ctx.font = 'bold 84px Georgia, serif';
+      ctx.fillStyle = '#fff6c7';
+      ctx.font = 'bold 86px Georgia, serif';
       ctx.textAlign = 'center';
       ctx.fillText('50', 256, 258);
 
-      // Traditional Calligraphy
-      ctx.fillStyle = '#ffe58f';
-      ctx.font = 'bold 68px "Noto Serif TC", "Songti TC", "PingFang HK", serif';
+      ctx.fillStyle = '#ffea96';
+      ctx.font = 'bold 70px "Noto Serif TC", "Songti TC", "PingFang HK", serif';
       ctx.fillText('五十載', 256, 440);
       ctx.fillText('耆康安老', 256, 540);
 
-      // Interlocking Rings Motif
-      ctx.strokeStyle = 'rgba(255, 230, 140, 0.9)';
+      ctx.strokeStyle = 'rgba(255, 235, 150, 0.92)';
       ctx.lineWidth = 6;
       [-92, -46, 0, 46, 92].forEach((rx, idx) => {
         ctx.beginPath();
@@ -381,8 +455,7 @@
       return tex;
     }
 
-    // --- Build Monumental 3D Beijing-Style Cauldron ---
-    // Proportions: Height = ~50% screen height, Width >= 55% screen width
+    // --- Build Grand Olympic Cauldron Monument ---
     const cauldronGroup = new THREE.Group();
     scene.add(cauldronGroup);
 
@@ -390,60 +463,60 @@
     const bowlMat = new THREE.MeshStandardMaterial({
       map: colorTex,
       bumpMap: bumpTex,
-      bumpScale: 0.08,
-      metalness: 0.72,
-      roughness: 0.28,
+      bumpScale: 0.09,
+      metalness: 0.65,
+      roughness: 0.26,
       side: THREE.DoubleSide
     });
 
     const goldMat = new THREE.MeshStandardMaterial({
-      color: 0xffcf54,
-      metalness: 0.92,
-      roughness: 0.2
+      color: 0xffd65c,
+      metalness: 0.88,
+      roughness: 0.18
     });
 
-    const gunmetalMat = new THREE.MeshStandardMaterial({
-      color: 0x3b3230,
-      metalness: 0.85,
-      roughness: 0.32
+    const bronzePillarMat = new THREE.MeshStandardMaterial({
+      color: 0x5c4f4a,
+      metalness: 0.78,
+      roughness: 0.28
     });
 
-    const darkPlinthMat = new THREE.MeshStandardMaterial({
-      color: 0x160d0d,
-      metalness: 0.4,
-      roughness: 0.65
+    const marblePlinthMat = new THREE.MeshStandardMaterial({
+      color: 0x3b2628,
+      metalness: 0.35,
+      roughness: 0.45
     });
 
-    // 1. Stepped Ceremonial Stage Plinth
-    const plinthBottom = new THREE.Mesh(new THREE.BoxGeometry(6.2, 0.25, 3.2), darkPlinthMat);
-    plinthBottom.position.y = 0.125;
-    plinthBottom.receiveShadow = true;
-    cauldronGroup.add(plinthBottom);
+    // 1. Grand 3-Tiered Olympic Podium Base with Gold Mouldings
+    const tiers = [
+      { w: 7.4, h: 0.22, d: 3.8, y: 0.11 },
+      { w: 6.4, h: 0.20, d: 3.2, y: 0.32 },
+      { w: 5.4, h: 0.18, d: 2.6, y: 0.51 }
+    ];
+    tiers.forEach(t => {
+      const step = new THREE.Mesh(new THREE.BoxGeometry(t.w, t.h, t.d), marblePlinthMat);
+      step.position.y = t.y;
+      step.receiveShadow = true;
+      cauldronGroup.add(step);
 
-    const plinthGoldTrim1 = new THREE.Mesh(new THREE.BoxGeometry(6.26, 0.04, 3.26), goldMat);
-    plinthGoldTrim1.position.y = 0.25;
-    cauldronGroup.add(plinthGoldTrim1);
+      const trim = new THREE.Mesh(new THREE.BoxGeometry(t.w + 0.06, 0.04, t.d + 0.06), goldMat);
+      trim.position.y = t.y + t.h / 2;
+      cauldronGroup.add(trim);
+    });
 
-    const plinthTop = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.22, 2.6), darkPlinthMat);
-    plinthTop.position.y = 0.36;
-    plinthTop.receiveShadow = true;
-    cauldronGroup.add(plinthTop);
-
-    const plinthGoldTrim2 = new THREE.Mesh(new THREE.BoxGeometry(5.26, 0.04, 2.66), goldMat);
-    plinthGoldTrim2.position.y = 0.47;
-    cauldronGroup.add(plinthGoldTrim2);
-
-    // 2. Two Tall Angled Gunmetal-Bronze Support Pillars
+    // 2. Two Tall Angled Metallic Support Pillars + Gold Trim Strips
     function createPillar(side) {
+      const group = new THREE.Group();
+
       const shape = new THREE.Shape();
-      shape.moveTo(-0.42, 0);
-      shape.lineTo(0.42, 0);
-      shape.lineTo(0.56, 3.35);
-      shape.lineTo(-0.34, 3.35);
+      shape.moveTo(-0.46, 0);
+      shape.lineTo(0.46, 0);
+      shape.lineTo(0.62, 3.25);
+      shape.lineTo(-0.36, 3.25);
       shape.closePath();
 
       const geom = new THREE.ExtrudeGeometry(shape, {
-        depth: 0.65,
+        depth: 0.72,
         bevelEnabled: true,
         bevelThickness: 0.04,
         bevelSize: 0.04,
@@ -451,24 +524,32 @@
       });
       geom.center();
 
-      const mesh = new THREE.Mesh(geom, gunmetalMat);
-      mesh.position.set(side * 1.48, 2.12, 0);
-      mesh.scale.x = side;
+      const mesh = new THREE.Mesh(geom, bronzePillarMat);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
-      return mesh;
+      group.add(mesh);
+
+      // Vertical gold architectural inlay strip along outer edge
+      const inlay = new THREE.Mesh(new THREE.BoxGeometry(0.08, 3.22, 0.82), goldMat);
+      inlay.position.set(0.46, 0, 0);
+      inlay.rotation.z = -0.045;
+      group.add(inlay);
+
+      group.position.set(side * 1.54, 2.22, 0);
+      group.scale.x = side;
+      return group;
     }
     cauldronGroup.add(createPillar(-1));
     cauldronGroup.add(createPillar(1));
 
-    // 3. Exposed Golden Burner Neck & Mechanical Pipes Under the Bowl
-    const neckCylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.45, 0.75, 24), goldMat);
-    neckCylinder.position.set(0, 3.62, 0);
+    // 3. Exposed Golden Mechanical Burner Collar & Pipes Under the Bowl
+    const neckCylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.5, 0.75, 28), goldMat);
+    neckCylinder.position.set(0, 3.68, 0);
     cauldronGroup.add(neckCylinder);
 
-    [-0.32, 0, 0.32].forEach(px => {
-      const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.85, 12), goldMat);
-      pipe.position.set(px, 3.6, 0.48);
+    [-0.36, -0.12, 0.12, 0.36].forEach(px => {
+      const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.85, 12), goldMat);
+      pipe.position.set(px, 3.66, 0.52);
       cauldronGroup.add(pipe);
     });
 
@@ -476,95 +557,103 @@
     const plaqueTex = createPlaqueTexture();
     const plaqueMat = new THREE.MeshStandardMaterial({
       map: plaqueTex,
-      metalness: 0.35,
-      roughness: 0.4
+      metalness: 0.25,
+      roughness: 0.35
     });
 
-    const plaqueGeom = new THREE.CylinderGeometry(1.18, 0.92, 2.35, 4);
+    const plaqueGeom = new THREE.CylinderGeometry(1.24, 0.96, 2.32, 4);
     plaqueGeom.rotateY(Math.PI / 4);
-    // Flatten Z depth so it forms a sleek architectural shield
-    plaqueGeom.scale(1.18, 1.0, 0.24);
+    plaqueGeom.scale(1.2, 1.0, 0.24);
 
-    // Remap UVs cleanly onto the front face of the trapezoidal shield
     const posAttr = plaqueGeom.attributes.position;
     const uvAttr = plaqueGeom.attributes.uv;
     for (let i = 0; i < posAttr.count; i++) {
       const x = posAttr.getX(i);
       const y = posAttr.getY(i);
-      const u = (x / 2.2) + 0.5;
-      const v = (y / 2.35) + 0.5;
-      uvAttr.setXY(i, u, v);
+      uvAttr.setXY(i, (x / 2.3) + 0.5, (y / 2.32) + 0.5);
     }
 
     const plaqueMesh = new THREE.Mesh(plaqueGeom, plaqueMat);
-    plaqueMesh.position.set(0, 2.38, 0.36);
+    plaqueMesh.position.set(0, 2.46, 0.38);
     plaqueMesh.castShadow = true;
     cauldronGroup.add(plaqueMesh);
 
-    // Gold Border Frame around Plaque
-    const plaqueFrameGeom = new THREE.CylinderGeometry(1.22, 0.96, 2.41, 4);
+    const plaqueFrameGeom = new THREE.CylinderGeometry(1.28, 1.0, 2.38, 4);
     plaqueFrameGeom.rotateY(Math.PI / 4);
-    plaqueFrameGeom.scale(1.18, 1.0, 0.21);
+    plaqueFrameGeom.scale(1.2, 1.0, 0.21);
     const plaqueFrame = new THREE.Mesh(plaqueFrameGeom, goldMat);
-    plaqueFrame.position.set(0, 2.38, 0.34);
+    plaqueFrame.position.set(0, 2.46, 0.36);
     cauldronGroup.add(plaqueFrame);
 
-    // 5. Wide Shallow Olympic Cauldron Bowl (LatheGeometry for Smooth 3D Curvature)
+    // 5. Grand Olympic Cauldron Bowl (Wide, Sculpted & Embossed)
     const bowlPoints = [
       new THREE.Vector2(0.0, 0.0),
-      new THREE.Vector2(1.4, 0.05),
-      new THREE.Vector2(2.7, 0.28),
-      new THREE.Vector2(3.75, 0.68),
-      new THREE.Vector2(4.25, 1.05),
-      new THREE.Vector2(4.05, 1.08),
-      new THREE.Vector2(3.4, 0.72),
-      new THREE.Vector2(0.0, 0.48)
+      new THREE.Vector2(1.5, 0.06),
+      new THREE.Vector2(2.85, 0.30),
+      new THREE.Vector2(3.95, 0.72),
+      new THREE.Vector2(4.45, 1.12),
+      new THREE.Vector2(4.25, 1.15),
+      new THREE.Vector2(3.55, 0.76),
+      new THREE.Vector2(0.0, 0.52)
     ];
-    const bowlGeom = new THREE.LatheGeometry(bowlPoints, 72);
+    const bowlGeom = new THREE.LatheGeometry(bowlPoints, 80);
     const bowlMesh = new THREE.Mesh(bowlGeom, bowlMat);
-    bowlMesh.position.set(0, 3.72, 0);
+    bowlMesh.position.set(0, 3.74, 0);
     bowlMesh.castShadow = true;
     bowlMesh.receiveShadow = true;
     cauldronGroup.add(bowlMesh);
 
-    // Brilliant Metallic Gold Rim Torus on Top of the Bowl
-    const rimTorus = new THREE.Mesh(new THREE.TorusGeometry(4.16, 0.065, 16, 96), goldMat);
+    // Double Metallic Gold Rim Rings on Top of the Bowl
+    const rimTorus = new THREE.Mesh(new THREE.TorusGeometry(4.36, 0.075, 18, 96), goldMat);
     rimTorus.rotation.x = Math.PI / 2;
-    rimTorus.position.set(0, 4.78, 0);
+    rimTorus.position.set(0, 4.87, 0);
     cauldronGroup.add(rimTorus);
 
-    // --- Tiered Arena Stage Floor & Background Steps ---
+    const lowerRimTorus = new THREE.Mesh(new THREE.TorusGeometry(4.12, 0.04, 14, 96), goldMat);
+    lowerRimTorus.rotation.x = Math.PI / 2;
+    lowerRimTorus.position.set(0, 4.65, 0);
+    cauldronGroup.add(lowerRimTorus);
+
+    // --- Reflective Ceremonial Stage Floor & Golden Carpet Runner ---
     const stageFloor = new THREE.Mesh(
-      new THREE.CircleGeometry(28, 64),
-      new THREE.MeshStandardMaterial({ color: 0x0b0708, metalness: 0.65, roughness: 0.35 })
+      new THREE.CircleGeometry(36, 64),
+      new THREE.MeshStandardMaterial({ color: 0x22161c, metalness: 0.55, roughness: 0.32 })
     );
     stageFloor.rotation.x = -Math.PI / 2;
     stageFloor.receiveShadow = true;
     scene.add(stageFloor);
 
-    // Tiered Auditorium Steps in Background
-    const stepMat = new THREE.MeshStandardMaterial({ color: 0x100b0c, metalness: 0.4, roughness: 0.7 });
-    for (let s = 0; s < 10; s++) {
-      const step = new THREE.Mesh(new THREE.BoxGeometry(46, 0.45, 1.2), stepMat);
-      step.position.set(0, s * 0.55 + 0.2, -7 - s * 1.15);
-      scene.add(step);
-    }
+    // Ceremonial Red & Gold Stage Carpet Leading to the Podium
+    const carpet = new THREE.Mesh(
+      new THREE.PlaneGeometry(8.6, 18),
+      new THREE.MeshStandardMaterial({ color: 0x6e0e14, roughness: 0.75, metalness: 0.1 })
+    );
+    carpet.rotation.x = -Math.PI / 2;
+    carpet.position.set(0, 0.005, 5);
+    scene.add(carpet);
 
-    // --- Volumetric Stage Spotlights ---
-    const spotLights = [];
+    // --- Bright Multi-Point Arena Lighting (Ensures Cauldron Is Always Clearly Visible) ---
+    const hemiLight = new THREE.HemisphereLight(0xffe8cc, 0x3a1c24, 1.45);
+    scene.add(hemiLight);
+
+    const frontKeyLight = new THREE.DirectionalLight(0xfff4de, 2.8);
+    frontKeyLight.position.set(3.5, 9.5, 11.5);
+    frontKeyLight.castShadow = true;
+    scene.add(frontKeyLight);
+
+    const leftRimLight = new THREE.DirectionalLight(0xdceeff, 1.8);
+    leftRimLight.position.set(-9, 8, 6);
+    scene.add(leftRimLight);
+
+    const rightRimLight = new THREE.DirectionalLight(0xffdfaa, 1.8);
+    rightRimLight.position.set(9, 8, 6);
+    scene.add(rightRimLight);
+
+    // Volumetric Stage Spotlights
     const beamMeshes = [];
-
     function createStageBeam(x, y, z, targetX, targetY, colorHex) {
-      const spot = new THREE.SpotLight(colorHex, 45, 45, Math.PI / 7, 0.65, 1.2);
-      spot.position.set(x, y, z);
-      spot.target.position.set(targetX, targetY, 0);
-      scene.add(spot);
-      scene.add(spot.target);
-      spotLights.push(spot);
-
-      // Visible Volumetric Cone
-      const coneGeom = new THREE.ConeGeometry(3.8, 22, 32, 1, true);
-      coneGeom.translate(0, -11, 0);
+      const coneGeom = new THREE.ConeGeometry(4.0, 24, 32, 1, true);
+      coneGeom.translate(0, -12, 0);
       const coneMat = new THREE.ShaderMaterial({
         transparent: true,
         depthWrite: false,
@@ -572,7 +661,7 @@
         side: THREE.DoubleSide,
         uniforms: {
           uColor: { value: new THREE.Color(colorHex) },
-          uOpacity: { value: 0.11 }
+          uOpacity: { value: 0.13 }
         },
         vertexShader: `
           varying vec2 vUv;
@@ -605,27 +694,17 @@
       cone.lookAt(targetX, targetY, 0);
       cone.rotateX(Math.PI / 2);
       scene.add(cone);
-      beamMeshes.push({ cone, baseX: x, phase: Math.random() * Math.PI * 2 });
+      beamMeshes.push({ cone, phase: Math.random() * Math.PI * 2 });
     }
 
-    createStageBeam(-9.5, 13, -4, -1.5, 2.5, 0xdbeeff);
-    createStageBeam(9.5, 13, -4, 1.5, 2.5, 0xdbeeff);
-    createStageBeam(-5.5, 14, -6, 0, 4.0, 0xffe4b5);
-    createStageBeam(5.5, 14, -6, 0, 4.0, 0xffe4b5);
+    createStageBeam(-10, 13.5, -4, -1.5, 2.5, 0xe3f1ff);
+    createStageBeam(10, 13.5, -4, 1.5, 2.5, 0xe3f1ff);
+    createStageBeam(-5.5, 14.5, -6, 0, 4.0, 0xffe6ba);
+    createStageBeam(5.5, 14.5, -6, 0, 4.0, 0xffe6ba);
 
-    // Key Rim Light on Cauldron
-    const keyLight = new THREE.DirectionalLight(0xfff0d4, 2.4);
-    keyLight.position.set(4, 9, 8);
-    keyLight.castShadow = true;
-    scene.add(keyLight);
-
-    const fillLight = new THREE.DirectionalLight(0x88aaff, 0.9);
-    fillLight.position.set(-7, 6, 5);
-    scene.add(fillLight);
-
-    // Dynamic Fire Point Light that flickers across the metallic gold & crimson
-    const fireLight = new THREE.PointLight(0xff6a00, 0, 24, 1.4);
-    fireLight.position.set(0, 5.4, 0.6);
+    // Dynamic Fire Point Light
+    const fireLight = new THREE.PointLight(0xff7700, 0, 26, 1.3);
+    fireLight.position.set(0, 5.6, 0.8);
     scene.add(fireLight);
 
     // --- Custom GPU GLSL Volumetric Fire Shader ---
@@ -652,7 +731,6 @@
         uniform float uHeat;
         varying vec2 vUv;
 
-        // 2D Value Noise & FBM Turbulence
         float hash(vec2 p) {
           return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
         }
@@ -681,23 +759,19 @@
           if (uHeat <= 0.005) discard;
 
           vec2 uv = vUv;
-          // Normalize X from -1 to 1
           float nx = (uv.x - 0.5) * 2.0;
           float ny = uv.y;
 
-          // Flame height scales dynamically with uHeat (0.0 to 1.0)
           float maxH = mix(0.08, 0.96, uHeat);
           float hNorm = ny / maxH;
           if (hNorm > 1.05) discard;
 
-          // Rising turbulent distortion
           vec2 flowUv = vec2(nx * 2.6, ny * 3.8 - uTime * 3.4);
           float n1 = fbm(flowUv);
           float n2 = fbm(flowUv * 1.9 + vec2(uTime * 0.7, -uTime * 2.1));
           float turb = mix(n1, n2, 0.45);
 
-          // Taper flame width as it rises, wider base at high heat
-          float baseSpread = mix(0.22, 0.88, sqrt(uHeat));
+          float baseSpread = mix(0.24, 0.90, sqrt(uHeat));
           float taper = mix(baseSpread, 0.04, pow(clamp(hNorm, 0.0, 1.0), 0.85));
           float distFromCenter = abs(nx + (turb - 0.5) * 0.42 * hNorm);
 
@@ -707,36 +781,34 @@
           float intensity = shape * verticalMask * (0.65 + 0.75 * turb);
           intensity = smoothstep(0.18, 0.88, intensity) * smoothstep(0.0, 0.12, uHeat);
 
-          // Blackbody Fire Color Ramp (Deep Crimson -> Bright Orange -> Golden Yellow -> White Core)
-          vec3 col = mix(vec3(0.85, 0.08, 0.0), vec3(1.0, 0.42, 0.02), smoothstep(0.15, 0.48, intensity));
-          col = mix(col, vec3(1.0, 0.85, 0.22), smoothstep(0.45, 0.75, intensity));
-          col = mix(col, vec3(1.0, 0.98, 0.88), smoothstep(0.75, 0.98, intensity));
+          vec3 col = mix(vec3(0.88, 0.10, 0.0), vec3(1.0, 0.44, 0.02), smoothstep(0.15, 0.48, intensity));
+          col = mix(col, vec3(1.0, 0.86, 0.24), smoothstep(0.45, 0.75, intensity));
+          col = mix(col, vec3(1.0, 0.99, 0.90), smoothstep(0.75, 0.98, intensity));
 
           gl_FragColor = vec4(col * 1.45, clamp(intensity * 1.25, 0.0, 1.0));
         }
       `
     });
 
-    // Crossed Volumetric Fire Planes seated inside the Cauldron Bowl
-    const firePlaneGeom = new THREE.PlaneGeometry(7.8, 5.2);
+    const firePlaneGeom = new THREE.PlaneGeometry(8.2, 5.3);
     const firePlane1 = new THREE.Mesh(firePlaneGeom, fireMat);
-    firePlane1.position.set(0, 7.15, 0.05);
+    firePlane1.position.set(0, 7.25, 0.05);
     cauldronGroup.add(firePlane1);
 
     const firePlane2 = new THREE.Mesh(firePlaneGeom, fireMat);
-    firePlane2.position.set(0, 7.15, -0.05);
+    firePlane2.position.set(0, 7.25, -0.05);
     firePlane2.rotation.y = 0.22;
     cauldronGroup.add(firePlane2);
 
-    // --- 3D Rising Golden Sparks & Embers Particle System ---
+    // --- 3D Rising Golden Sparks ---
     const sparkCount = 260;
     const sparkGeom = new THREE.BufferGeometry();
     const sparkPos = new Float32Array(sparkCount * 3);
     const sparkVel = [];
 
     for (let i = 0; i < sparkCount; i++) {
-      sparkPos[i * 3] = (Math.random() - 0.5) * 6.5;
-      sparkPos[i * 3 + 1] = 4.7 + Math.random() * 5.0;
+      sparkPos[i * 3] = (Math.random() - 0.5) * 6.8;
+      sparkPos[i * 3 + 1] = 4.8 + Math.random() * 5.0;
       sparkPos[i * 3 + 2] = (Math.random() - 0.5) * 1.5;
       sparkVel.push({
         vx: (Math.random() - 0.5) * 0.035,
@@ -747,8 +819,8 @@
     sparkGeom.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3));
 
     const sparkMat = new THREE.PointsMaterial({
-      color: 0xffcf54,
-      size: 0.09,
+      color: 0xffd666,
+      size: 0.095,
       transparent: true,
       opacity: 0,
       blending: THREE.AdditiveBlending,
@@ -766,18 +838,15 @@
       renderer.setSize(w, h);
       composer.setSize(w, h);
 
-      // Total cauldron height in 3D units is ~4.85 (from y=0 plinth to y=4.85 bowl rim)
-      // Total cauldron bowl width is ~8.45 (from x=-4.22 to x=+4.22)
       const dist = camera.position.z;
       const vFovRad = THREE.MathUtils.degToRad(camera.fov);
       const visibleHeightAtZero = 2 * Math.tan(vFovRad / 2) * dist;
       const visibleWidthAtZero = visibleHeightAtZero * camera.aspect;
 
-      const scaleY = (visibleHeightAtZero * 0.50) / 4.85;
-      const scaleX = Math.max(scaleY, (visibleWidthAtZero * 0.56) / 8.45);
+      const scaleY = (visibleHeightAtZero * 0.50) / 4.95;
+      const scaleX = Math.max(scaleY, (visibleWidthAtZero * 0.58) / 8.85);
 
       cauldronGroup.scale.set(scaleX, scaleY, scaleY);
-      // Anchor plinth right at the bottom edge of the screen
       cauldronGroup.position.y = 3.3 - (visibleHeightAtZero * 0.485);
     }
     window.addEventListener('resize', updateFraming);
@@ -793,26 +862,22 @@
       heatValue += (targetHeat - heatValue) * 0.05;
       const heatNorm = heatValue / 100;
 
-      // Slogan Reveal at Peak Climax (>= 95%)
       if (heatValue >= 95) {
         sloganBanner.classList.add('visible');
       } else {
         sloganBanner.classList.remove('visible');
       }
 
-      // Update GPU Fire Shader
       fireUniforms.uTime.value = elapsed;
       fireUniforms.uHeat.value = heatNorm;
 
-      // Flickering Fire Light illuminating the 3D Gold Scrolls & Crimson Plaque
       const flicker = Math.sin(elapsed * 19.0) * 0.14 + Math.cos(elapsed * 31.0) * 0.09;
-      fireLight.intensity = heatNorm > 0.01 ? (heatNorm * 42 + flicker * 8 * heatNorm) : 0;
+      fireLight.intensity = heatNorm > 0.01 ? (heatNorm * 45 + flicker * 8 * heatNorm) : 0;
 
-      // Animate Rising Golden Sparks
       sparkMat.opacity = Math.min(0.95, heatNorm * 1.15);
       const posArr = sparkGeom.attributes.position.array;
-      const spread = 3.6 * Math.sqrt(Math.max(0.05, heatNorm));
-      const maxSparkY = 4.8 + heatNorm * 5.2;
+      const spread = 3.8 * Math.sqrt(Math.max(0.05, heatNorm));
+      const maxSparkY = 4.9 + heatNorm * 5.2;
 
       for (let i = 0; i < sparkCount; i++) {
         posArr[i * 3] += sparkVel[i].vx + Math.sin(elapsed * 3 + i) * 0.008;
@@ -821,16 +886,14 @@
 
         if (posArr[i * 3 + 1] > maxSparkY || heatNorm < 0.02) {
           posArr[i * 3] = (Math.random() - 0.5) * 2 * spread;
-          posArr[i * 3 + 1] = 4.65 + Math.random() * 0.3;
+          posArr[i * 3 + 1] = 4.75 + Math.random() * 0.3;
           posArr[i * 3 + 2] = (Math.random() - 0.5) * 1.2;
         }
       }
       sparkGeom.attributes.position.needsUpdate = true;
 
-      // Subtle Ceremonial Spotlight Sweep
-      beamMeshes.forEach((b, idx) => {
-        const sway = Math.sin(elapsed * 0.45 + b.phase) * 0.08;
-        b.cone.rotation.z = sway;
+      beamMeshes.forEach((b) => {
+        b.cone.rotation.z = Math.sin(elapsed * 0.45 + b.phase) * 0.08;
       });
 
       composer.render();
