@@ -22,7 +22,7 @@
       position: fixed;
       inset: 0;
       background:
-        radial-gradient(circle at 50% 35%, rgba(95, 22, 12, 0.55) 0%, rgba(10, 4, 4, 0.96) 72%),
+        radial-gradient(circle at 50% 42%, rgba(95, 22, 12, 0.55) 0%, rgba(10, 4, 4, 0.96) 72%),
         repeating-linear-gradient(
           to bottom,
           rgba(255, 215, 130, 0.03) 0px,
@@ -73,7 +73,7 @@
     /* Grand Ceremonial Slogan Reveal Overlay */
     .banner-container {
       position: fixed;
-      top: 3vh;
+      top: 4vh;
       left: 0;
       width: 100%;
       z-index: 6;
@@ -92,24 +92,24 @@
     }
 
     .laurel {
-      height: 13vh;
-      min-height: 85px;
+      height: 14vh;
+      min-height: 90px;
       filter: drop-shadow(0 0 14px rgba(255, 200, 50, 0.75));
     }
 
     .slogan-plaque {
-      background: linear-gradient(180deg, rgba(35, 8, 8, 0.82) 0%, rgba(18, 4, 4, 0.88) 100%);
-      border-top: 2px solid rgba(255, 215, 100, 0.75);
-      border-bottom: 2px solid rgba(255, 215, 100, 0.75);
-      padding: 1.4vh 3.5vw;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.85), inset 0 0 25px rgba(255, 190, 50, 0.18);
+      background: linear-gradient(180deg, rgba(35, 8, 8, 0.85) 0%, rgba(18, 4, 4, 0.9) 100%);
+      border-top: 2px solid rgba(255, 215, 100, 0.8);
+      border-bottom: 2px solid rgba(255, 215, 100, 0.8);
+      padding: 1.6vh 3.8vw;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.85), inset 0 0 25px rgba(255, 190, 50, 0.2);
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
     .slogan-title {
-      font-size: 4.5vh;
+      font-size: 4.8vh;
       font-weight: 900;
       letter-spacing: 0.35em;
       margin-right: -0.35em;
@@ -117,7 +117,7 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       filter: drop-shadow(0 2px 12px rgba(255, 180, 0, 0.85));
-      line-height: 1.3;
+      line-height: 1.32;
     }
 
     #setup-badge {
@@ -274,75 +274,74 @@
       alpha: Math.random() * 0.5 + 0.15
     }));
 
-    // Scaled so the cauldron structure spans ~78% (over 3/4) of the screen height
+    // Height = 50% of viewport height (scaleY), Width >= 56% of viewport width (scaleX)
     function getCauldronMetrics() {
-      const targetHeight = canvas.height * 0.78;
-      const baseHeight = 520; // internal coordinate height from bowl rim (0) to floor base (520)
-      const scale = Math.min(targetHeight / baseHeight, (canvas.width * 0.62) / 560);
+      const baseHeight = 400; // internal height from bowl rim (0) to bottom plinth (400)
+      const baseWidth = 760;  // internal bowl rim width (-380 to +380)
+
+      const scaleY = (canvas.height * 0.50) / baseHeight;
+      const scaleX = Math.max(scaleY * 1.15, (canvas.width * 0.56) / baseWidth);
+
       const cX = canvas.width / 2;
-      const cY = canvas.height - (baseHeight * scale);
-      return { cX, cY, scale };
+      const cY = canvas.height - (baseHeight * scaleY);
+      return { cX, cY, scaleX, scaleY };
     }
 
     function createFireParticle() {
-      const { cX, cY, scale } = getCauldronMetrics();
-      const widthRange = 215 * scale * (heatValue / 100);
+      const { cX, cY, scaleX, scaleY } = getCauldronMetrics();
+      const widthRange = 310 * scaleX * (heatValue / 100);
       return {
         x: cX + (Math.random() - 0.5) * widthRange,
-        y: cY + (Math.random() - 0.5) * 10 * scale,
-        vx: (Math.random() - 0.5) * 2.5 * scale,
-        vy: (-Math.random() * (4.6 + (heatValue / 14)) - 2.0) * scale,
-        size: (Math.random() * 34 + 14) * scale,
+        y: cY + (Math.random() - 0.5) * 10 * scaleY,
+        vx: (Math.random() - 0.5) * 3.0 * scaleX,
+        vy: (-Math.random() * (4.8 + (heatValue / 13)) - 2.2) * scaleY,
+        size: (Math.random() * 38 + 16) * Math.min(scaleX, scaleY * 1.25),
         alpha: 1,
-        decay: Math.random() * 0.02 + 0.008,
+        decay: Math.random() * 0.019 + 0.007,
         colorSeed: Math.random()
       };
     }
 
     function createSparkParticle() {
-      const { cX, cY, scale } = getCauldronMetrics();
+      const { cX, cY, scaleX, scaleY } = getCauldronMetrics();
       return {
-        x: cX + (Math.random() - 0.5) * 240 * scale,
+        x: cX + (Math.random() - 0.5) * 340 * scaleX,
         y: cY,
-        vx: (Math.random() - 0.5) * 7 * scale,
-        vy: (-Math.random() * 9.5 - 3.5) * scale,
-        size: (Math.random() * 4 + 1.2) * scale,
+        vx: (Math.random() - 0.5) * 8 * scaleX,
+        vy: (-Math.random() * 10 - 3.8) * scaleY,
+        size: (Math.random() * 4 + 1.4) * scaleY,
         alpha: 1,
         decay: Math.random() * 0.012 + 0.006
       };
     }
 
-    // Helper to draw an ornate 3D embossed cloud spiral on the bowl
+    // Ornate 3D embossed cloud spiral on the bowl
     function drawCloudScroll(x, y, radius, flip) {
       ctx.save();
       ctx.translate(x, y);
       if (flip) ctx.scale(-1, 1);
 
-      // Dark relief shadow under the gold scroll
       ctx.strokeStyle = 'rgba(45, 4, 4, 0.75)';
       ctx.lineWidth = 5;
       ctx.beginPath();
       ctx.arc(0, 2, radius, 0.2 * Math.PI, 1.85 * Math.PI);
       ctx.stroke();
 
-      // Outer bright gold spiral
       ctx.strokeStyle = '#ffe58f';
       ctx.lineWidth = 3.2;
       ctx.beginPath();
       ctx.arc(0, 0, radius, 0.2 * Math.PI, 1.85 * Math.PI);
       ctx.stroke();
 
-      // Inner tight coil
       ctx.strokeStyle = '#ffcf4d';
       ctx.lineWidth = 2.4;
       ctx.beginPath();
       ctx.arc(2, 0, radius * 0.52, 0, 1.7 * Math.PI);
       ctx.stroke();
 
-      // Flowing tail connecting scrolls
       ctx.beginPath();
       ctx.moveTo(-radius, 2);
-      ctx.quadraticCurveTo(-radius * 1.35, -radius * 0.6, -radius * 1.75, -2);
+      ctx.quadraticCurveTo(-radius * 1.35, -radius * 0.6, -radius * 1.85, -2);
       ctx.stroke();
 
       ctx.restore();
@@ -372,21 +371,21 @@
         ctx.fill();
       });
 
-      const { cX, cY, scale } = getCauldronMetrics();
+      const { cX, cY, scaleX, scaleY } = getCauldronMetrics();
 
       // Ceremonial Stage Floor & Golden Light Pool
-      const floorY = canvas.height - (18 * scale);
-      const stageFloorGrad = ctx.createRadialGradient(cX, floorY, 20, cX, floorY, 520 * scale);
-      stageFloorGrad.addColorStop(0, `rgba(255, ${140 - heatValue * 0.6}, 40, ${0.22 + heatValue / 280})`);
+      const floorY = canvas.height - (14 * scaleY);
+      const stageFloorGrad = ctx.createRadialGradient(cX, floorY, 20, cX, floorY, 560 * scaleX);
+      stageFloorGrad.addColorStop(0, `rgba(255, ${140 - heatValue * 0.6}, 40, ${0.24 + heatValue / 260})`);
       stageFloorGrad.addColorStop(0.55, 'rgba(60, 20, 15, 0.25)');
       stageFloorGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = stageFloorGrad;
       ctx.beginPath();
-      ctx.ellipse(cX, floorY, 540 * scale, 55 * scale, 0, 0, Math.PI * 2);
+      ctx.ellipse(cX, floorY, 580 * scaleX, 45 * scaleY, 0, 0, Math.PI * 2);
       ctx.fill();
 
       // Spawn & Render Sparks
-      const sparkSpawnRate = heatValue > 90 ? 22 : Math.floor(heatValue / 6);
+      const sparkSpawnRate = heatValue > 90 ? 24 : Math.floor(heatValue / 5.5);
       for (let i = 0; i < sparkSpawnRate; i++) sparks.push(createSparkParticle());
 
       for (let i = sparks.length - 1; i >= 0; i--) {
@@ -402,8 +401,8 @@
         ctx.fill();
       }
 
-      // Spawn & Render Fire (Sits inside the top of the bowl)
-      const fireSpawnCount = Math.floor(heatValue / 2.4);
+      // Spawn & Render Fire
+      const fireSpawnCount = Math.floor(heatValue / 2.1);
       for (let i = 0; i < fireSpawnCount; i++) particles.push(createFireParticle());
 
       for (let i = particles.length - 1; i >= 0; i--) {
@@ -430,186 +429,174 @@
       }
 
       // =========================================================================
-      // DRAW MONUMENTAL BEIJING-STYLE SCROLLWORK CAULDRON (3/4 SCREEN HEIGHT)
+      // DRAW WIDE MONUMENTAL BEIJING-STYLE CAULDRON (1/2 HEIGHT, >= 1/2 WIDTH)
       // =========================================================================
       ctx.save();
       ctx.translate(cX, cY);
-      ctx.scale(scale, scale);
+      ctx.scale(scaleX, scaleY);
 
-      // 1. Ceremonial Backlight Aura around the Monument
-      const monumentHalo = ctx.createRadialGradient(0, 180, 40, 0, 180, 420);
+      // 1. Ceremonial Backlight Aura
+      const monumentHalo = ctx.createRadialGradient(0, 150, 40, 0, 150, 460);
       monumentHalo.addColorStop(0, `rgba(255, 200, 120, ${0.24 + heatValue / 380})`);
       monumentHalo.addColorStop(0.6, 'rgba(140, 30, 15, 0.12)');
       monumentHalo.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = monumentHalo;
       ctx.beginPath();
-      ctx.arc(0, 180, 420, 0, Math.PI * 2);
+      ctx.arc(0, 150, 460, 0, Math.PI * 2);
       ctx.fill();
 
       // 2. Stepped Ceremonial Stage Plinth at the Base
       ctx.fillStyle = '#180d0d';
-      ctx.fillRect(-195, 496, 390, 24);
+      ctx.fillRect(-260, 380, 520, 20);
       ctx.strokeStyle = '#d4a23c';
       ctx.lineWidth = 2;
-      ctx.strokeRect(-195, 496, 390, 24);
+      ctx.strokeRect(-260, 380, 520, 20);
 
       ctx.fillStyle = '#241313';
-      ctx.fillRect(-165, 478, 330, 18);
+      ctx.fillRect(-220, 364, 440, 16);
       ctx.strokeStyle = '#ffd866';
       ctx.lineWidth = 2;
-      ctx.strokeRect(-165, 478, 330, 18);
+      ctx.strokeRect(-220, 364, 440, 16);
 
       // 3. Exposed Golden Mechanical Burner Collar & Pipes Underneath the Bowl
-      // (Matches the bright gold mechanical support visible under the bowl in the photo)
-      const neckGrad = ctx.createLinearGradient(-48, 0, 48, 0);
+      const neckGrad = ctx.createLinearGradient(-64, 0, 64, 0);
       neckGrad.addColorStop(0, '#785014');
       neckGrad.addColorStop(0.35, '#ffd966');
       neckGrad.addColorStop(0.65, '#fff0a8');
       neckGrad.addColorStop(1, '#6b4510');
       ctx.fillStyle = neckGrad;
-      ctx.fillRect(-38, 86, 76, 48);
+      ctx.fillRect(-52, 74, 104, 40);
 
-      // Vertical gold burner struts
       ctx.fillStyle = '#4a300a';
-      ctx.fillRect(-22, 90, 8, 40);
-      ctx.fillRect(14, 90, 8, 40);
+      ctx.fillRect(-30, 78, 10, 32);
+      ctx.fillRect(20, 78, 10, 32);
       ctx.strokeStyle = '#ffe58f';
       ctx.lineWidth = 2;
-      ctx.strokeRect(-38, 86, 76, 48);
+      ctx.strokeRect(-52, 74, 104, 40);
 
       // 4. Two Tall Angled Gunmetal-Bronze Support Pillars (Left & Right)
-      // Left Pillar
-      const leftPillarGrad = ctx.createLinearGradient(-155, 0, -65, 0);
+      const leftPillarGrad = ctx.createLinearGradient(-200, 0, -90, 0);
       leftPillarGrad.addColorStop(0, '#2a2220');
       leftPillarGrad.addColorStop(0.3, '#5c4d48');
       leftPillarGrad.addColorStop(0.7, '#3b302d');
       leftPillarGrad.addColorStop(1, '#1a1413');
       ctx.fillStyle = leftPillarGrad;
       ctx.beginPath();
-      ctx.moveTo(-148, 92);
-      ctx.lineTo(-124, 478);
-      ctx.lineTo(-76, 478);
-      ctx.lineTo(-82, 92);
+      ctx.moveTo(-195, 78);
+      ctx.lineTo(-162, 364);
+      ctx.lineTo(-102, 364);
+      ctx.lineTo(-110, 78);
       ctx.closePath();
       ctx.fill();
       ctx.strokeStyle = '#8c7552';
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // Inner bevel highlight on Left Pillar
       ctx.strokeStyle = 'rgba(255, 225, 165, 0.35)';
       ctx.beginPath();
-      ctx.moveTo(-136, 96);
-      ctx.lineTo(-114, 474);
+      ctx.moveTo(-180, 82);
+      ctx.lineTo(-150, 360);
       ctx.stroke();
 
-      // Right Pillar
-      const rightPillarGrad = ctx.createLinearGradient(65, 0, 155, 0);
+      const rightPillarGrad = ctx.createLinearGradient(90, 0, 200, 0);
       rightPillarGrad.addColorStop(0, '#1a1413');
       rightPillarGrad.addColorStop(0.3, '#3b302d');
       rightPillarGrad.addColorStop(0.7, '#5c4d48');
       rightPillarGrad.addColorStop(1, '#2a2220');
       ctx.fillStyle = rightPillarGrad;
       ctx.beginPath();
-      ctx.moveTo(82, 92);
-      ctx.lineTo(76, 478);
-      ctx.lineTo(124, 478);
-      ctx.lineTo(148, 92);
+      ctx.moveTo(110, 78);
+      ctx.lineTo(102, 364);
+      ctx.lineTo(162, 364);
+      ctx.lineTo(195, 78);
       ctx.closePath();
       ctx.fill();
       ctx.strokeStyle = '#8c7552';
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // Inner bevel highlight on Right Pillar
       ctx.strokeStyle = 'rgba(255, 225, 165, 0.35)';
       ctx.beginPath();
-      ctx.moveTo(136, 96);
-      ctx.lineTo(114, 474);
+      ctx.moveTo(180, 82);
+      ctx.lineTo(150, 360);
       ctx.stroke();
 
       // 5. Suspended Trapezoidal Imperial Crimson Plaque Between the Pillars
-      // (Matches the red shield panel suspended between the two pillars in the photo)
-      const plaqueGrad = ctx.createLinearGradient(-86, 125, 86, 385);
+      const plaqueGrad = ctx.createLinearGradient(-115, 102, 115, 295);
       plaqueGrad.addColorStop(0, '#d91c1c');
       plaqueGrad.addColorStop(0.45, '#b81212');
       plaqueGrad.addColorStop(1, '#7a0909');
 
-      // Subtle drop shadow behind plaque
+      // Drop shadow behind plaque
       ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
       ctx.beginPath();
-      ctx.moveTo(-88, 132);
-      ctx.lineTo(88, 132);
-      ctx.lineTo(72, 392);
-      ctx.lineTo(-72, 392);
+      ctx.moveTo(-116, 108);
+      ctx.lineTo(116, 108);
+      ctx.lineTo(95, 302);
+      ctx.lineTo(-95, 302);
       ctx.closePath();
       ctx.fill();
 
       // Main Red Plaque
       ctx.fillStyle = plaqueGrad;
       ctx.beginPath();
-      ctx.moveTo(-86, 126);
-      ctx.lineTo(86, 126);
-      ctx.lineTo(70, 384);
-      ctx.lineTo(-70, 384);
+      ctx.moveTo(-114, 102);
+      ctx.lineTo(114, 102);
+      ctx.lineTo(93, 294);
+      ctx.lineTo(-93, 294);
       ctx.closePath();
       ctx.fill();
 
-      // Gold Trim Border on Red Plaque
       ctx.strokeStyle = '#ffd866';
       ctx.lineWidth = 3;
       ctx.stroke();
 
-      // Inner Recessed Ceremonial Frame
       ctx.strokeStyle = 'rgba(255, 225, 130, 0.5)';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(-74, 138);
-      ctx.lineTo(74, 138);
-      ctx.lineTo(60, 372);
-      ctx.lineTo(-60, 372);
+      ctx.moveTo(-98, 112);
+      ctx.lineTo(98, 112);
+      ctx.lineTo(80, 284);
+      ctx.lineTo(-80, 284);
       ctx.closePath();
       ctx.stroke();
 
       // Ceremonial Emblem & Calligraphy Inside the Crimson Plaque
-      // Gold Seal / Torch Motif
       ctx.strokeStyle = '#ffe58f';
       ctx.lineWidth = 2.5;
       ctx.beginPath();
-      ctx.arc(0, 192, 26, 0, Math.PI * 2);
+      ctx.arc(0, 152, 22, 0, Math.PI * 2);
       ctx.stroke();
 
       ctx.fillStyle = '#fff3b8';
-      ctx.font = 'bold 26px Georgia, serif';
+      ctx.font = 'bold 23px Georgia, serif';
       ctx.textAlign = 'center';
-      ctx.fillText('50', 0, 201);
+      ctx.fillText('50', 0, 160);
 
       ctx.fillStyle = '#ffe58f';
-      ctx.font = 'bold 20px "Noto Serif TC", "Songti TC", "PingFang HK", serif';
-      ctx.fillText('五十載', 0, 254);
-      ctx.fillText('耆康安老', 0, 286);
+      ctx.font = 'bold 18px "Noto Serif TC", "Songti TC", "PingFang HK", serif';
+      ctx.fillText('五十載', 0, 200);
+      ctx.fillText('耆康安老', 0, 226);
 
-      // Decorative interlocking rings at bottom of plaque (nodding to the Olympic emblem)
+      // Decorative interlocking rings at bottom of plaque
       ctx.strokeStyle = 'rgba(255, 225, 130, 0.85)';
       ctx.lineWidth = 2;
-      [-22, -11, 0, 11, 22].forEach((rx, idx) => {
+      [-28, -14, 0, 14, 28].forEach((rx, idx) => {
         ctx.beginPath();
-        ctx.arc(rx, idx % 2 === 0 ? 330 : 337, 8, 0, Math.PI * 2);
+        ctx.arc(rx, idx % 2 === 0 ? 256 : 262, 7.5, 0, Math.PI * 2);
         ctx.stroke();
       });
 
-      // 6. Wide Shallow Olympic Cauldron Bowl (Top Crown)
-      // Bowl Rim Opening (Dark Interior)
+      // 6. Wide Shallow Olympic Cauldron Bowl (Top Crown - Spans >= 1/2 Screen Width)
       ctx.fillStyle = '#290707';
       ctx.beginPath();
-      ctx.ellipse(0, 2, 268, 22, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 2, 370, 20, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = '#ffd866';
       ctx.lineWidth = 3;
       ctx.stroke();
 
-      // Bowl Outer Metallic Red-Gold Body
-      const bowlGrad = ctx.createLinearGradient(-275, 0, 275, 0);
+      const bowlGrad = ctx.createLinearGradient(-380, 0, 380, 0);
       bowlGrad.addColorStop(0, '#5e0808');
       bowlGrad.addColorStop(0.2, '#b51616');
       bowlGrad.addColorStop(0.5, '#e0281b');
@@ -618,34 +605,34 @@
 
       ctx.fillStyle = bowlGrad;
       ctx.beginPath();
-      ctx.moveTo(-275, 0);
-      ctx.bezierCurveTo(-240, 96, 240, 96, 275, 0);
-      ctx.bezierCurveTo(165, 16, -165, 16, -275, 0);
+      ctx.moveTo(-380, 0);
+      ctx.bezierCurveTo(-330, 86, 330, 86, 380, 0);
+      ctx.bezierCurveTo(225, 14, -225, 14, -380, 0);
       ctx.closePath();
       ctx.fill();
 
-      // Brilliant Gold Top Rim & Bottom Curve Trim
       ctx.strokeStyle = '#ffe58f';
       ctx.lineWidth = 5;
       ctx.stroke();
 
-      // Second inner gold rim line
       ctx.strokeStyle = 'rgba(255, 215, 100, 0.65)';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(-258, 12);
-      ctx.quadraticCurveTo(0, 26, 258, 12);
+      ctx.moveTo(-358, 10);
+      ctx.quadraticCurveTo(0, 22, 358, 10);
       ctx.stroke();
 
-      // 7. Rich 3D Auspicious Cloud Scrolls Across the Bowl Face
+      // 7. Rich 3D Auspicious Cloud Scrolls Across the Wide Bowl Face
       const scrollPositions = [
-        { x: -205, y: 34, r: 15, flip: false },
-        { x: -138, y: 46, r: 18, flip: true },
-        { x: -68,  y: 53, r: 19, flip: false },
-        { x: 0,    y: 55, r: 20, flip: true },
-        { x: 68,   y: 53, r: 19, flip: false },
-        { x: 138,  y: 46, r: 18, flip: true },
-        { x: 205,  y: 34, r: 15, flip: false }
+        { x: -290, y: 29, r: 15, flip: false },
+        { x: -215, y: 38, r: 17, flip: true },
+        { x: -142, y: 45, r: 18, flip: false },
+        { x: -70,  y: 49, r: 19, flip: true },
+        { x: 0,    y: 50, r: 20, flip: false },
+        { x: 70,   y: 49, r: 19, flip: true },
+        { x: 142,  y: 45, r: 18, flip: false },
+        { x: 215,  y: 38, r: 17, flip: true },
+        { x: 290,  y: 29, r: 15, flip: false }
       ];
       scrollPositions.forEach(s => drawCloudScroll(s.x, s.y, s.r, s.flip));
 
@@ -653,12 +640,12 @@
       if (heatValue > 5) {
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
-        const fireRimGlow = ctx.createRadialGradient(0, 0, 10, 0, 0, 280);
+        const fireRimGlow = ctx.createRadialGradient(0, 0, 10, 0, 0, 380);
         fireRimGlow.addColorStop(0, `rgba(255, 200, 80, ${heatValue / 140})`);
         fireRimGlow.addColorStop(1, 'rgba(255, 60, 0, 0)');
         ctx.fillStyle = fireRimGlow;
         ctx.beginPath();
-        ctx.ellipse(0, 6, 275, 36, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 5, 380, 32, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       }
