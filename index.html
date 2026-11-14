@@ -1,282 +1,768 @@
+<!-- Save this entirely as index.html in your github repo -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Backstage Controller - 50th Anniversary Ceremony</title>
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <title>50th Anniversary Ceremony Cauldron Screen</title>
   <style>
+    /* Reset and Core Layout */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: #110b0b;
-      color: #f3e9e9;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      min-height: 100vh;
+      background-color: #050101;
+      color: #fff;
+      font-family: 'PingFang HK', 'Microsoft JhengHei', sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Cinematic Background Overlay */
+    .bg-ambience {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle at 50% 70%, #1c0505 0%, #000 75%);
+      z-index: 1;
+      opacity: 0.8;
+      transition: opacity 2s ease;
+    }
+
+    /* Screen Frame / Theater borders for ceremony */
+    .viewport {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4vh 2vw;
+    }
+
+    /* stage spotlight beams simulating live event */
+    .spotlights {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 3;
+    }
+    .beam {
+      position: absolute;
+      top: -20%;
+      width: 15vw;
+      height: 150vh;
+      background: radial-gradient(ellipse at top, rgba(255, 230, 180, 0.15) 0%, rgba(255, 230, 180, 0) 70%);
+      transform-origin: top center;
+      animation: sweep 12s ease-in-out infinite alternate;
+    }
+    .beam-left { left: 15%; transform: rotate(-25deg); animation-delay: -3s; }
+    .beam-right { right: 15%; transform: rotate(25deg); }
+    @keyframes sweep {
+      0% { transform: rotate(-20deg) scaleX(0.8); opacity: 0.2; }
+      50% { transform: rotate(0deg) scaleX(1.2); opacity: 0.5; }
+      100% { transform: rotate(20deg) scaleX(0.8); opacity: 0.2; }
+    }
+
+    /* Slogan Banner container */
+    .banner-container {
+      width: 90%;
+      text-align: center;
+      z-index: 5;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px;
+      gap: 3vw;
+      opacity: 0;
+      transform: translateY(-30px) scale(0.95);
+      transition: all 2.5s cubic-bezier(0.19, 1, 0.22, 1);
     }
-    .panel {
+    .banner-container.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    /* Slogan details matching image style */
+    .laurel {
+      height: 12vh;
+      min-height: 80px;
+      opacity: 0.9;
+    }
+    .slogan-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .slogan-title {
+      font-size: 5vh;
+      font-weight: 900;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #fff7d6 0%, #ffdf6d 40%, #cca03c 70%, #fff7d6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 15px rgba(255, 191, 0, 0.5));
+      margin-bottom: 1.5vh;
+      transform: scale(0.95);
+      transition: transform 1.5s ease;
+    }
+    .visible .slogan-title {
+      transform: scale(1);
+    }
+
+    /* Main Visuals area: Cauldron Canvas overlay */
+    .cauldron-wrapper {
+      position: relative;
       width: 100%;
-      max-width: 520px;
-      background: #1b1111;
-      border: 1px solid rgba(255, 215, 0, 0.35);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.85);
+      height: 65%;
+      flex-grow: 1;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
     }
-    .header {
+    canvas#stage-canvas {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* 2D Grand Cauldron drawing parameters container (CSS sizing layer overlay) */
+    .interactive-overlay {
+      position: absolute;
+      bottom: 0;
+      width: 450px;
+      height: 350px;
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    /* console backstage UI panel */
+    .backstage-console {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      width: 320px;
+      background: rgba(18, 10, 10, 0.95);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 12px;
+      padding: 18px;
+      z-index: 100;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 68, 0, 0.15);
+      font-family: monospace;
+      color: #9f8c8c;
+      transform: translateX(350px);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .backstage-console.visible {
+      transform: translateX(0);
+    }
+    .backstage-toggle {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: #3a1a1a;
+      border: 1px solid rgba(255, 215, 0, 0.45);
+      color: #ffd700;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 101;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .backstage-toggle:hover {
+      background: #6a2a2a;
+      box-shadow: 0 0 12px #ff4500;
+    }
+
+    /* UI components inside control panel */
+    .console-header {
+      font-size: 0.85rem;
+      color: #ffd700;
+      margin-bottom: 12px;
+      border-bottom: 1px dashed rgba(255, 215, 0, 0.3);
+      padding-bottom: 6px;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(255, 215, 0, 0.2);
-      padding-bottom: 14px;
-      margin-bottom: 20px;
     }
-    .header h1 {
-      font-size: 1.15rem;
-      color: #ffd700;
-      letter-spacing: 0.05em;
-    }
-    .live-badge {
-      background: #3a1212;
-      border: 1px solid #ff4500;
-      color: #ff7b54;
-      padding: 4px 10px;
-      border-radius: 99px;
-      font-size: 0.75rem;
-      font-weight: bold;
-    }
-    .card {
-      background: #140c0c;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
+    .console-section {
+      margin-bottom: 15px;
     }
     .label-row {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      font-size: 0.9rem;
-      color: #cbb8b8;
+      font-size: 0.8rem;
+      margin-bottom: 5px;
     }
-    .percentage {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: #ffd700;
-    }
-    input[type="range"] {
+    .slider {
       -webkit-appearance: none;
       width: 100%;
-      height: 14px;
-      border-radius: 8px;
-      background: linear-gradient(90deg, #2c1515 0%, #ff4500 70%, #ffd700 100%);
+      height: 6px;
+      border-radius: 3px;
+      background: #2b1212;
       outline: none;
       cursor: pointer;
     }
-    input[type="range"]::-webkit-slider-thumb {
+    .slider::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 28px;
-      height: 28px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
-      background: #fff;
-      border: 4px solid #ff4500;
-      box-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
+      background: #ffd700;
+      border: 2px solid #ff4500;
+      cursor: pointer;
     }
-    .cue-grid {
+    .quick-preset-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    button {
-      background: #271515;
-      border: 1px solid rgba(255, 215, 0, 0.3);
-      color: #fff;
-      padding: 14px 12px;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    button:hover { background: #3b1c1c; }
-    button.active {
-      background: linear-gradient(135deg, #d93800, #ff6a00);
-      border-color: #ffd700;
-      box-shadow: 0 0 15px rgba(255, 69, 0, 0.5);
-    }
-    button.climax {
-      grid-column: span 2;
-      background: linear-gradient(135deg, #8b0000, #c81d11);
-      border-color: #ffd700;
-      color: #fff7d6;
-      font-size: 1.05rem;
-    }
-    button.climax.active {
-      background: linear-gradient(135deg, #d49b00, #ff4500);
-    }
-    .connect-row {
-      display: flex;
       gap: 8px;
-      margin-top: 8px;
+      margin-top: 5px;
     }
-    input[type="text"] {
-      flex: 1;
-      background: #0d0707;
-      border: 1px solid #442b2b;
+    .console-btn {
+      background: #201010;
+      border: 1px solid #ff4500;
+      color: #f7a5a5;
+      padding: 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .console-btn:hover {
+      background: #4a1515;
       color: #fff;
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 0.95rem;
     }
-    .status-note {
-      font-size: 0.8rem;
-      color: #9e8a8a;
+    .console-btn.active {
+      background: #ff4500;
+      border-color: #ffd700;
+      color: #fff;
+      font-weight: bold;
+    }
+    .audio-status-box {
+      font-size: 0.75rem;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 6px;
+      border-radius: 4px;
       margin-top: 8px;
     }
   </style>
 </head>
 <body>
 
-  <div class="panel">
-    <div class="header">
-      <h1>🔥 BACKSTAGE CONSOLE</h1>
-      <span class="live-badge" id="sync-status">LOCAL SYNC READY</span>
+  <!-- Ambiance Layer -->
+  <div class="bg-ambience" id="ambient-overlay"></div>
+
+  <!-- Stage Light/Sweep Overlay -->
+  <div class="spotlights">
+    <div class="beam beam-left"></div>
+    <div class="beam beam-right"></div>
+  </div>
+
+  <!-- Theater Viewport with interactive stages -->
+  <div class="viewport">
+    <!-- Top display banner: Celebration slogan -->
+    <div class="banner-container" id="ceremony-slogan">
+      <!-- Left 50th Emblem -->
+      <svg class="laurel" viewBox="0 0 120 120">
+        <path d="M 20 50 C 15 75 35 95 60 95 C 85 95 105 75 100 50" fill="none" stroke="gold" stroke-width="2.5" stroke-dasharray="2,2" />
+        <path d="M 20 60 A 40 40 0 0 0 100 60" fill="none" stroke="gold" stroke-width="1.5" />
+        <g stroke="gold" fill="gold">
+          <!-- Leaves Left -->
+          <path d="M 20 50 C 15 45 10 45 12 55 C 15 50 18 48 20 50 Z" />
+          <path d="M 25 65 C 18 62 14 65 17 73 C 20 68 23 66 25 65 Z" />
+          <path d="M 35 80 C 28 80 26 85 31 92 C 33 87 35 84 35 80 Z" />
+          <!-- Leaves Right -->
+          <path d="M 100 50 C 105 45 110 45 108 55 C 105 50 102 48 100 50 Z" />
+          <path d="M 95 65 C 102 62 106 65 103 73 C 100 68 97 66 95 65 Z" />
+          <path d="M 85 80 C 92 80 94 85 89 92 C 87 87 85 84 85 80 Z" />
+        </g>
+        <text x="50%" y="42" font-family="Garamond, serif" font-weight="900" font-size="25" fill="#fff5be" text-anchor="middle" style="filter:drop-shadow(0 0 4px gold);">50</text>
+        <text x="50%" y="58" font-family="PingFang HK" font-weight="600" font-size="8" fill="#ffd700" letter-spacing="1" text-anchor="middle">金禧校慶</text>
+      </svg>
+
+      <!-- Central Chinese Slogan -->
+      <div class="slogan-box">
+        <h1 class="slogan-title">五十載耆康安老</h1>
+        <h1 class="slogan-title" style="font-size: 5.5vh; margin-bottom:0;">以初心關顧同行</h1>
+      </div>
+
+      <!-- Right 50th Emblem -->
+      <svg class="laurel" viewBox="0 0 120 120">
+        <path d="M 20 50 C 15 75 35 95 60 95 C 85 95 105 75 100 50" fill="none" stroke="gold" stroke-width="2.5" stroke-dasharray="2,2" />
+        <path d="M 20 60 A 40 40 0 0 0 100 60" fill="none" stroke="gold" stroke-width="1.5" />
+        <g stroke="gold" fill="gold">
+          <path d="M 20 50 C 15 45 10 45 12 55 C 15 50 18 48 20 50 Z" />
+          <path d="M 25 65 C 18 62 14 65 17 73 C 20 68 23 66 25 65 Z" />
+          <path d="M 35 80 C 28 80 26 85 31 92 C 33 87 35 84 35 80 Z" />
+          <path d="M 100 50 C 105 45 110 45 108 55 C 105 50 102 48 100 50 Z" />
+          <path d="M 95 65 C 102 62 106 65 103 73 C 100 68 97 66 95 65 Z" />
+          <path d="M 85 80 C 92 80 94 85 89 92 C 87 87 85 84 85 80 Z" />
+        </g>
+        <text x="50%" y="42" font-family="Garamond, serif" font-weight="900" font-size="25" fill="#fff5be" text-anchor="middle" style="filter:drop-shadow(0 0 4px gold);">50</text>
+        <text x="50%" y="58" font-family="PingFang HK" font-weight="600" font-size="8" fill="#ffd700" letter-spacing="1" text-anchor="middle">愛與關懷</text>
+      </svg>
     </div>
 
-    <!-- Fire Intensity Fader -->
-    <div class="card">
-      <div class="label-row">
-        <span>Flame Intensity</span>
-        <span class="percentage" id="heat-display">0%</span>
-      </div>
-      <input type="range" id="heat-slider" min="0" max="100" value="0">
-    </div>
-
-    <!-- Ceremony Cue Buttons -->
-    <div class="card">
-      <div class="label-row"><span>Ceremony Cues (or press Spacebar)</span></div>
-      <div class="cue-grid">
-        <button class="active" data-heat="0">0% &bull; Extinguished</button>
-        <button data-heat="25">25% &bull; First Spark</button>
-        <button data-heat="60">60% &bull; Rising Flame</button>
-        <button data-heat="85">85% &bull; High Blaze</button>
-        <button class="climax" data-heat="100">100% &bull; CLIMAX (Slogan + Closing Music)</button>
-      </div>
-    </div>
-
-    <!-- Audio & Display Controls -->
-    <div class="card">
-      <div class="label-row"><span>Manual Overrides</span></div>
-      <div class="cue-grid">
-        <button id="btn-play-music">▶ Force Music On</button>
-        <button id="btn-stop-music">⏹ Mute Music</button>
-        <button id="btn-hide-badge" style="grid-column: span 2;">Hide Setup Box on Stage Screen</button>
-      </div>
-    </div>
-
-    <!-- Optional Second-Device Pairing -->
-    <div class="card" style="margin-bottom: 0;">
-      <div class="label-row"><span>Control From Another Device (Optional)</span></div>
-      <div class="connect-row">
-        <input type="text" id="remote-code-input" placeholder="Enter 4-digit ID from Stage Screen">
-        <button id="btn-connect-remote" style="padding: 10px 18px;">Connect</button>
-      </div>
-      <div class="status-note" id="remote-status">
-        If both tabs are on the same laptop, they sync automatically without entering a code.
-      </div>
+    <!-- Canvas area containing the Grand Red and Gold Olympic Cauldron -->
+    <div class="cauldron-wrapper">
+      <canvas id="stage-canvas"></canvas>
     </div>
   </div>
 
+  <!-- Toggle button for control panel -->
+  <button class="backstage-toggle" id="toggle-console-btn" title="Open Backstage Panel (Press C)">
+    🛠️
+  </button>
+
+  <!-- Control Backstage UI overlay -->
+  <div class="backstage-console" id="console-panel">
+    <div class="console-header">
+      <span>BACKSTAGE FIRE CONTROLLER</span>
+      <span style="color:#f00; font-weight: bold;">🔴 DIRECT</span>
+    </div>
+
+    <div class="console-section">
+      <div class="label-row">
+        <span>Fader Elevation</span>
+        <span id="level-percentage" style="color: #ffd700; font-weight: bold;">0%</span>
+      </div>
+      <input type="range" class="slider" id="fader-input" min="0" max="100" value="0">
+    </div>
+
+    <div class="console-section">
+      <div class="label-row"><span>Presets (Cues)</span></div>
+      <div class="quick-preset-grid">
+        <button class="console-btn active" id="btn-0">Off (0%)</button>
+        <button class="console-btn" id="btn-20">Ignite (20%)</button>
+        <button class="console-btn" id="btn-50">Medium (50%)</button>
+        <button class="console-btn" id="btn-100">Peak Climax (100%)</button>
+      </div>
+    </div>
+
+    <div class="console-section" style="margin-bottom: 5px;">
+      <div class="label-row">
+        <span>Theatrical Music</span>
+        <span id="audio-indicator" style="color: #999;">Paused</span>
+      </div>
+      <button class="console-btn" id="audio-opt-btn" style="width: 100%; border-color: gold;">▶ Toggle Audio Check</button>
+      <div class="audio-status-box">
+        💡 High-intensity sound triggered automatically above 95%. Try testing the Audio Check if it remains silent!
+      </div>
+    </div>
+    <div style="font-size: 0.65em; text-align: center; color: #5c4b4b; margin-top:10px;">
+      Pres C to hide/show | Space to cycle | F for Fullscreen
+    </div>
+  </div>
+
+  <!-- Dynamic Grand Spark particles, Cauldron Rendering, & Music Core -->
   <script>
-    const slider = document.getElementById('heat-slider');
-    const heatDisplay = document.getElementById('heat-display');
-    const cueButtons = document.querySelectorAll('[data-heat]');
-    const channel = new BroadcastChannel('cauldron_ceremony_sync');
+    // Audio engine & trigger mechanism (Using public royalty-free orchestration links for stability)
+    const AUDIO_URL = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"; // Powerful cinematic theme
+    const ceremonialAudio = new Audio(AUDIO_URL);
+    ceremonialAudio.loop = true;
+    ceremonialAudio.volume = 0.8;
+    
+    let isMusicTriggered = false;
+    let userHasInteracted = false;
 
-    let remoteConn = null;
-    let currentHeat = 0;
+    // Track state globally
+    let heatValue = 0; // Current actual fire level 0-100
+    let targetHeat = 0; // Smooth follow value for the backend sliders
 
-    function broadcastState(payload) {
-      // 1. Same-computer sync
-      channel.postMessage(payload);
-      localStorage.setItem('cauldron_state', JSON.stringify({ ...payload, ts: Date.now() }));
+    // Document & Visual Engine selectors
+    const canvas = document.getElementById('stage-canvas');
+    const ctx = canvas.getContext('2d');
+    const fader = document.getElementById('fader-input');
+    const levelText = document.getElementById('level-percentage');
+    const sloganBanner = document.getElementById('ceremony-slogan');
+    const ambientBg = document.getElementById('ambient-overlay');
+    const consolePanel = document.getElementById('console-panel');
+    const toggleBtn = document.getElementById('toggle-console-btn');
 
-      // 2. Second-device Wi-Fi sync
-      if (remoteConn && remoteConn.open) {
-        remoteConn.send(payload);
+    // Button controls
+    const buttons = {
+      0: document.getElementById('btn-0'),
+      20: document.getElementById('btn-20'),
+      50: document.getElementById('btn-50'),
+      100: document.getElementById('btn-100')
+    };
+
+    // Particles system matching Chinese festive visuals
+    const particles = [];
+    const embers = [];
+    const sparks = [];
+
+    // Scale canvas to device size
+    function resizeCanvas() {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Event listener helper for user-authorized sound API interaction
+    function initiateAudioContext() {
+      if (!userHasInteracted) {
+        userHasInteracted = true;
+        // Start audio pre-buffered on low volume to pass autoplay rules
+        ceremonialAudio.play().then(() => {
+          if (!isMusicTriggered) {
+            ceremonialAudio.pause();
+          }
+        }).catch(err => console.log("Audio waiting for explicit play input."));
       }
     }
+    document.addEventListener('pointerdown', initiateAudioContext);
+    document.addEventListener('keydown', initiateAudioContext);
 
-    function setHeat(val) {
-      currentHeat = Math.max(0, Math.min(100, parseInt(val, 10)));
-      slider.value = currentHeat;
-      heatDisplay.textContent = currentHeat + '%';
-
-      cueButtons.forEach(btn => {
-        btn.classList.toggle('active', parseInt(btn.dataset.heat, 10) === currentHeat);
+    // Audio controls
+    function startCeremonyAudio() {
+      if (isMusicTriggered) return;
+      isMusicTriggered = true;
+      document.getElementById('audio-indicator').textContent = "🎵 Playing Ceremony Theme";
+      document.getElementById('audio-indicator').style.color = "#ffd700";
+      
+      ceremonialAudio.currentTime = 0; // Starts from dynamic crescendo segment
+      ceremonialAudio.play().catch(e => {
+        document.getElementById('audio-indicator').textContent = "🔇 Unmute to play";
+        document.getElementById('audio-indicator').style.color = "#f00";
       });
-
-      broadcastState({ heat: currentHeat });
     }
 
-    slider.addEventListener('input', (e) => setHeat(e.target.value));
+    function stopCeremonyAudio() {
+      if (!isMusicTriggered) return;
+      isMusicTriggered = false;
+      document.getElementById('audio-indicator').textContent = "Paused";
+      document.getElementById('audio-indicator').style.color = "#999";
+      ceremonialAudio.pause();
+    }
 
-    cueButtons.forEach(btn => {
-      btn.addEventListener('click', () => setHeat(btn.dataset.heat));
+    // Toggle Console Display (H) for show security
+    toggleBtn.addEventListener('click', () => {
+      consolePanel.classList.toggle('visible');
     });
 
-    document.getElementById('btn-play-music').addEventListener('click', () => {
-      broadcastState({ audio: 'play' });
-    });
-
-    document.getElementById('btn-stop-music').addEventListener('click', () => {
-      broadcastState({ audio: 'stop' });
-    });
-
-    document.getElementById('btn-hide-badge').addEventListener('click', () => {
-      broadcastState({ hideBadge: true });
-    });
-
-    // Keyboard shortcuts on Backstage Laptop
     document.addEventListener('keydown', (e) => {
-      if (e.target.tagName === 'INPUT') return;
+      if (e.key === 'c' || e.key === 'C') {
+        consolePanel.classList.toggle('visible');
+      }
+      if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+      // Spacebar cycles key event progression
       if (e.key === ' ') {
         e.preventDefault();
-        const steps = [0, 25, 60, 85, 100];
-        const next = steps.find(s => s > currentHeat) ?? 0;
-        setHeat(next);
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        setHeat(currentHeat + 5);
-      } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        setHeat(currentHeat - 5);
+        const cycle = [0, 20, 50, 100];
+        let currentIdx = cycle.indexOf(targetHeat);
+        if (currentIdx === -1) currentIdx = 0;
+        let nextLevel = cycle[(currentIdx + 1) % cycle.length];
+        triggerCue(nextLevel);
       }
     });
 
-    // Remote PeerJS Connection for controlling from a separate phone/iPad
-    const peer = new Peer();
-    document.getElementById('btn-connect-remote').addEventListener('click', () => {
-      const code = document.getElementById('remote-code-input').value.trim();
-      if (!code) return;
-      document.getElementById('remote-status').textContent = 'Connecting to stage screen...';
-
-      remoteConn = peer.connect('cauldron-' + code);
-      remoteConn.on('open', () => {
-        document.getElementById('sync-status').textContent = 'REMOTE CONNECTED';
-        document.getElementById('sync-status').style.borderColor = '#4caf50';
-        document.getElementById('sync-status').style.color = '#81c784';
-        document.getElementById('remote-status').textContent = 'Connected! Sending live controls to stage.';
-        remoteConn.send({ heat: currentHeat, hideBadge: true });
+    // Cue execution engine (Syncs with inputs & labels)
+    function triggerCue(level) {
+      targetHeat = level;
+      fader.value = level;
+      levelText.textContent = `${level}%`;
+      
+      // Update UI visual button state highlights
+      Object.keys(buttons).forEach(k => {
+        if (parseInt(k) === level) {
+          buttons[k].classList.add('active');
+        } else {
+          buttons[k].classList.remove('active');
+        }
       });
-      remoteConn.on('error', () => {
-        document.getElementById('remote-status').textContent = 'Connection failed. Check the 4-digit code.';
+    }
+
+    // Bind console elements
+    fader.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value);
+      targetHeat = val;
+      levelText.textContent = `${val}%`;
+      // remove highlight to avoid misclicking feedback
+      Object.values(buttons).forEach(b => b.classList.remove('active'));
+      if (buttons[val]) buttons[val].classList.add('active');
+    });
+
+    Object.keys(buttons).forEach(level => {
+      buttons[level].addEventListener('click', () => {
+        triggerCue(parseInt(level));
       });
     });
+
+    // Debug check play/pause toggle
+    document.getElementById('audio-opt-btn').addEventListener('click', () => {
+      initiateAudioContext();
+      if (ceremonialAudio.paused) {
+        startCeremonyAudio();
+      } else {
+        stopCeremonyAudio();
+      }
+    });
+
+    // Dynamic fire particle creators
+    function createFireParticle() {
+      const originX = canvas.width / 2;
+      const originY = canvas.height - 180;
+      
+      const widthRange = 100 * (heatValue / 100);
+      
+      return {
+        x: originX + (Math.random() - 0.5) * widthRange,
+        y: originY + (Math.random() - 0.5) * 15,
+        vx: (Math.random() - 0.5) * 2,
+        vy: -Math.random() * (4 + (heatValue / 12)) - 2,
+        size: Math.random() * 25 + 12,
+        alpha: 1,
+        decay: Math.random() * 0.02 + 0.005,
+        colorSeed: Math.random()
+      };
+    }
+
+    function createSparkParticle() {
+      const originX = canvas.width / 2;
+      const originY = canvas.height - 180;
+      return {
+        x: originX + (Math.random() - 0.5) * 120,
+        y: originY,
+        vx: (Math.random() - 0.5) * 6,
+        vy: -Math.random() * 8 - 4,
+        size: Math.random() * 4 + 1,
+        alpha: 1,
+        decay: Math.random() * 0.01 + 0.005
+      };
+    }
+
+    // Core Drawing loop using 2D WebGL style rendering
+    function render() {
+      // Smooth interpolation for fader lag during the natural ignition
+      heatValue += (targetHeat - heatValue) * 0.05;
+      
+      // Update environment, spotlights, and background glowing depending on fire scale
+      ambientBg.style.opacity = 0.5 + (heatValue / 200);
+      
+      // Trigger Golden Slogan on peak and play sound
+      if (heatValue >= 95) {
+        sloganBanner.classList.add('visible');
+        startCeremonyAudio();
+      } else {
+        sloganBanner.classList.remove('visible');
+        if (heatValue < 80) {
+          stopCeremonyAudio();
+        }
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Generate particles based on heat intensity
+      const fireSpawnCount = Math.floor(heatValue / 4);
+      for (let i = 0; i < fireSpawnCount; i++) {
+        particles.push(createFireParticle());
+      }
+
+      const sparkSpawnRate = heatValue > 90 ? 15 : Math.floor(heatValue / 8);
+      for (let i = 0; i < sparkSpawnRate; i++) {
+        sparks.push(createSparkParticle());
+      }
+
+      // Update & Draw Sparks (Rising floating golden embers)
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const s = sparks[i];
+        s.x += s.vx;
+        s.y += s.vy;
+        s.vy += 0.05; // gravity pulls the embers downwards gracefully over their path
+        s.alpha -= s.decay;
+
+        if (s.alpha <= 0) {
+          sparks.splice(i, 1);
+          continue;
+        }
+
+        ctx.fillStyle = `rgba(255, ${150 + Math.random() * 105}, 0, ${s.alpha})`;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Update & Draw Fire Particles (Rising gradient blobs)
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= p.decay;
+
+        if (p.alpha <= 0 || p.size <= 0.1) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        // Multistage glowing visual colors
+        let r = 255;
+        let g = 0;
+        let b = 0;
+
+        if (p.colorSeed < 0.4) {
+          g = Math.floor(180 + Math.random() * 75); // bright yellow center
+        } else if (p.colorSeed < 0.85) {
+          g = Math.floor(60 + Math.random() * 80); // deep hot orange outer boundary
+        } // remainder stays fiery deep red-yellow
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+        grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${p.alpha * 0.95})`);
+        grad.addColorStop(0.5, `rgba(${r}, ${g - 60 > 0 ? g - 60 : 0}, ${b}, ${p.alpha * 0.45})`);
+        grad.addColorStop(1, `rgba(${r}, 0, 0, 0)`);
+        
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Drawing the Massive Olympic Red & Gold Cauldron on Center Bottom
+      const baseScale = 1.0;
+      const cX = canvas.width / 2;
+      const cY = canvas.height - 180; // aligns correctly above base floor lines
+      
+      // Draw 3-pillar black pedestal and dynamic circular patterns
+      ctx.shadowBlur = 0;
+      
+      // Pedestal bottom steps
+      ctx.fillStyle = '#1e1111';
+      ctx.fillRect(cX - 120, cY + 120, 240, 40);
+      ctx.strokeStyle = '#dfa43a';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(cX - 120, cY + 120, 240, 40);
+      
+      // Golden top border for bottom step
+      ctx.fillStyle = '#cca03c';
+      ctx.fillRect(cX - 120, cY + 120, 240, 6);
+
+      // Support pillars
+      ctx.fillStyle = '#261b18';
+      // Left pillar
+      ctx.beginPath();
+      ctx.moveTo(cX - 70, cY + 15);
+      ctx.lineTo(cX - 55, cY + 120);
+      ctx.lineTo(cX - 35, cY + 120);
+      ctx.lineTo(cX - 45, cY + 15);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#443c30';
+      ctx.stroke();
+
+      // Right Pillar
+      ctx.beginPath();
+      ctx.moveTo(cX + 45, cY + 15);
+      ctx.lineTo(cX + 35, cY + 120);
+      ctx.lineTo(cX + 55, cY + 120);
+      ctx.lineTo(cX + 70, cY + 15);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Bold Central Red Pillar Pedestal
+      ctx.fillStyle = '#9b1414';
+      ctx.beginPath();
+      ctx.moveTo(cX - 35, cY + 15);
+      ctx.lineTo(cX - 25, cY + 120);
+      ctx.lineTo(cX + 25, cY + 120);
+      ctx.lineTo(cX + 35, cY + 15);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#cca03c';
+      ctx.stroke();
+
+      // Olympic Chinese Emblems & lettering in the Pedestal
+      ctx.fillStyle = '#f5d886';
+      ctx.font = 'bold 12px "Times New Roman"';
+      ctx.textAlign = 'center';
+      ctx.fillText('PASSION', cX, cY + 45);
+      ctx.fillText('金禧慶典', cX, cY + 65);
+
+      // Draw standard support jointing struts
+      ctx.fillStyle = '#7a1010';
+      ctx.fillRect(cX - 25, cY + 112, 50, 8);
+
+      // Draw the Top Grand Ceremonial Cauldron Bowl (Gold & Red Spiral patterns)
+      ctx.fillStyle = '#441414'; // base bowl interior shadow layer
+      ctx.beginPath();
+      ctx.ellipse(cX, cY + 10, 110, 15, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Cauldron main exterior bowl with patterned scroll gold trims
+      ctx.fillStyle = '#941414';
+      ctx.beginPath();
+      ctx.moveTo(cX - 120, cY);
+      ctx.bezierCurveTo(cX - 110, cY + 50, cX + 110, cY + 50, cX + 120, cY);
+      ctx.bezierCurveTo(cX + 70, cY - 10, cX - 70, cY - 10, cX - 120, cY);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Outline trim for Gold metallic aesthetics
+      ctx.strokeStyle = '#cca03c';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      // Traditional wave/cloud spirals around upper rim of cauldron
+      ctx.strokeStyle = '#fdd15a';
+      ctx.lineWidth = 2.5;
+      for (let i = -100; i <= 100; i += 30) {
+        ctx.beginPath();
+        ctx.arc(cX + i, cY + 16, 8, 0, Math.PI * 1.5, i % 60 === 0);
+        ctx.stroke();
+      }
+
+      // Draw base joint trim underneath the grand bowl
+      ctx.fillStyle = '#cca03c';
+      ctx.fillRect(cX - 15, cY + 15, 30, 8);
+
+      // Ground Glow/Illumination when lit
+      if (heatValue > 0) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        const groundGrad = ctx.createRadialGradient(cX, cY + 120, 10, cX, cY + 120, 200);
+        groundGrad.addColorStop(0, `rgba(255, 60, 0, ${heatValue / 150})`);
+        groundGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = groundGrad;
+        ctx.beginPath();
+        ctx.ellipse(cX, cY + 120, 250, 40, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      requestAnimationFrame(render);
+    }
+
+    // Launch visuals loop
+    render();
+
+    // Default: Display Console briefly in bottom corner on initialize
+    setTimeout(() => {
+      consolePanel.classList.add('visible');
+    }, 1000);
   </script>
 </body>
 </html>
