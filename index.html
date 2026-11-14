@@ -1,293 +1,282 @@
-<!-- Save this entirely as index.html in your github repo -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>50th Anniversary Ceremony Cauldron Screen</title>
+  <title>Backstage Controller - 50th Anniversary Ceremony</title>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <style>
-    /* Reset and Core Layout */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: #050101;
-      color: #fff;
-      font-family: 'PingFang HK', 'Microsoft JhengHei', sans-serif;
-      overflow: hidden;
-      width: 100vw;
-      height: 100vh;
+      background: #110b0b;
+      color: #f3e9e9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
-      position: relative;
+      align-items: center;
+      padding: 20px;
     }
-
-    /* Cinematic Background Overlay */
-    .bg-ambience {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: radial-gradient(circle at 50% 70%, #1c0505 0%, #000 75%);
-      z-index: 1;
-      opacity: 0.8;
-      transition: opacity 2s ease;
-    }
-
-    /* Screen Frame / Theater borders for ceremony */
-    .viewport {
+    .panel {
       width: 100%;
-      height: 100%;
-      position: relative;
-      overflow: hidden;
-      z-index: 2;
+      max-width: 520px;
+      background: #1b1111;
+      border: 1px solid rgba(255, 215, 0, 0.35);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.85);
+    }
+    .header {
       display: flex;
-      flex-direction: column;
       justify-content: space-between;
       align-items: center;
-      padding: 4vh 2vw;
+      border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+      padding-bottom: 14px;
+      margin-bottom: 20px;
     }
-
-    /* stage spotlight beams simulating live event */
-    .spotlights {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 3;
+    .header h1 {
+      font-size: 1.15rem;
+      color: #ffd700;
+      letter-spacing: 0.05em;
     }
-    .beam {
-      position: absolute;
-      top: -20%;
-      width: 15vw;
-      height: 150vh;
-      background: radial-gradient(ellipse at top, rgba(255, 230, 180, 0.15) 0%, rgba(255, 230, 180, 0) 70%);
-      transform-origin: top center;
-      animation: sweep 12s ease-in-out infinite alternate;
+    .live-badge {
+      background: #3a1212;
+      border: 1px solid #ff4500;
+      color: #ff7b54;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: bold;
     }
-    .beam-left { left: 15%; transform: rotate(-25deg); animation-delay: -3s; }
-    .beam-right { right: 15%; transform: rotate(25deg); }
-    @keyframes sweep {
-      0% { transform: rotate(-20deg) scaleX(0.8); opacity: 0.2; }
-      50% { transform: rotate(0deg) scaleX(1.2); opacity: 0.5; }
-      100% { transform: rotate(20deg) scaleX(0.8); opacity: 0.2; }
-    }
-
-    /* Slogan Banner container */
-    .banner-container {
-      width: 90%;
-      text-align: center;
-      z-index: 5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 3vw;
-      opacity: 0;
-      transform: translateY(-30px) scale(0.95);
-      transition: all 2.5s cubic-bezier(0.19, 1, 0.22, 1);
-    }
-    .banner-container.visible {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-
-    /* Slogan details matching image style */
-    .laurel {
-      height: 12vh;
-      min-height: 80px;
-      opacity: 0.9;
-    }
-    .slogan-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .slogan-title {
-      font-size: 5vh;
-      font-weight: 900;
-      letter-spacing: 0.35em;
-      text-transform: uppercase;
-      background: linear-gradient(135deg, #fff7d6 0%, #ffdf6d 40%, #cca03c 70%, #fff7d6 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0 15px rgba(255, 191, 0, 0.5));
-      margin-bottom: 1.5vh;
-      transform: scale(0.95);
-      transition: transform 1.5s ease;
-    }
-    .visible .slogan-title {
-      transform: scale(1);
-    }
-
-    /* Main Visuals area: Cauldron Canvas overlay */
-    .cauldron-wrapper {
-      position: relative;
-      width: 100%;
-      height: 65%;
-      flex-grow: 1;
-      z-index: 4;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      align-items: center;
-    }
-    canvas#stage-canvas {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    /* 2D Grand Cauldron drawing parameters container (CSS sizing layer overlay) */
-    .interactive-overlay {
-      position: absolute;
-      bottom: 0;
-      width: 450px;
-      height: 350px;
-      display: flex;
-      justify-content: center;
-      pointer-events: none;
-    }
-
-    /* console backstage UI panel */
-    .backstage-console {
-      position: fixed;
-      bottom: 25px;
-      right: 25px;
-      width: 320px;
-      background: rgba(18, 10, 10, 0.95);
-      border: 1px solid rgba(255, 215, 0, 0.3);
+    .card {
+      background: #140c0c;
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 12px;
-      padding: 18px;
-      z-index: 100;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 68, 0, 0.15);
-      font-family: monospace;
-      color: #9f8c8c;
-      transform: translateX(350px);
-      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .backstage-console.visible {
-      transform: translateX(0);
-    }
-    .backstage-toggle {
-      position: fixed;
-      bottom: 25px;
-      right: 25px;
-      width: 45px;
-      height: 45px;
-      border-radius: 50%;
-      background: #3a1a1a;
-      border: 1px solid rgba(255, 215, 0, 0.45);
-      color: #ffd700;
-      font-size: 1.2rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 101;
-      transition: background 0.2s, box-shadow 0.2s;
-    }
-    .backstage-toggle:hover {
-      background: #6a2a2a;
-      box-shadow: 0 0 12px #ff4500;
-    }
-
-    /* UI components inside control panel */
-    .console-header {
-      font-size: 0.85rem;
-      color: #ffd700;
-      margin-bottom: 12px;
-      border-bottom: 1px dashed rgba(255, 215, 0, 0.3);
-      padding-bottom: 6px;
-      display: flex;
-      justify-content: space-between;
-    }
-    .console-section {
-      margin-bottom: 15px;
+      padding: 16px;
+      margin-bottom: 16px;
     }
     .label-row {
       display: flex;
       justify-content: space-between;
-      font-size: 0.8rem;
-      margin-bottom: 5px;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+      color: #cbb8b8;
     }
-    .slider {
+    .percentage {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #ffd700;
+    }
+    input[type="range"] {
       -webkit-appearance: none;
       width: 100%;
-      height: 6px;
-      border-radius: 3px;
-      background: #2b1212;
+      height: 14px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #2c1515 0%, #ff4500 70%, #ffd700 100%);
       outline: none;
       cursor: pointer;
     }
-    .slider::-webkit-slider-thumb {
+    input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
-      background: #ffd700;
-      border: 2px solid #ff4500;
-      cursor: pointer;
+      background: #fff;
+      border: 4px solid #ff4500;
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
     }
-    .quick-preset-grid {
+    .cue-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 5px;
+      gap: 10px;
     }
-    .console-btn {
-      background: #201010;
-      border: 1px solid #ff4500;
-      color: #f7a5a5;
-      padding: 6px;
-      border-radius: 4px;
-      font-size: 0.75rem;
+    button {
+      background: #271515;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      color: #fff;
+      padding: 14px 12px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.15s;
     }
-    .console-btn:hover {
-      background: #4a1515;
-      color: #fff;
-    }
-    .console-btn.active {
-      background: #ff4500;
+    button:hover { background: #3b1c1c; }
+    button.active {
+      background: linear-gradient(135deg, #d93800, #ff6a00);
       border-color: #ffd700;
-      color: #fff;
-      font-weight: bold;
+      box-shadow: 0 0 15px rgba(255, 69, 0, 0.5);
     }
-    .audio-status-box {
-      font-size: 0.75rem;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 6px;
-      border-radius: 4px;
+    button.climax {
+      grid-column: span 2;
+      background: linear-gradient(135deg, #8b0000, #c81d11);
+      border-color: #ffd700;
+      color: #fff7d6;
+      font-size: 1.05rem;
+    }
+    button.climax.active {
+      background: linear-gradient(135deg, #d49b00, #ff4500);
+    }
+    .connect-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    input[type="text"] {
+      flex: 1;
+      background: #0d0707;
+      border: 1px solid #442b2b;
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    .status-note {
+      font-size: 0.8rem;
+      color: #9e8a8a;
       margin-top: 8px;
     }
   </style>
 </head>
 <body>
 
-  <!-- Ambiance Layer -->
-  <div class="bg-ambience" id="ambient-overlay"></div>
+  <div class="panel">
+    <div class="header">
+      <h1>🔥 BACKSTAGE CONSOLE</h1>
+      <span class="live-badge" id="sync-status">LOCAL SYNC READY</span>
+    </div>
 
-  <!-- Stage Light/Sweep Overlay -->
-  <div class="spotlights">
-    <div class="beam beam-left"></div>
-    <div class="beam beam-right"></div>
+    <!-- Fire Intensity Fader -->
+    <div class="card">
+      <div class="label-row">
+        <span>Flame Intensity</span>
+        <span class="percentage" id="heat-display">0%</span>
+      </div>
+      <input type="range" id="heat-slider" min="0" max="100" value="0">
+    </div>
+
+    <!-- Ceremony Cue Buttons -->
+    <div class="card">
+      <div class="label-row"><span>Ceremony Cues (or press Spacebar)</span></div>
+      <div class="cue-grid">
+        <button class="active" data-heat="0">0% &bull; Extinguished</button>
+        <button data-heat="25">25% &bull; First Spark</button>
+        <button data-heat="60">60% &bull; Rising Flame</button>
+        <button data-heat="85">85% &bull; High Blaze</button>
+        <button class="climax" data-heat="100">100% &bull; CLIMAX (Slogan + Closing Music)</button>
+      </div>
+    </div>
+
+    <!-- Audio & Display Controls -->
+    <div class="card">
+      <div class="label-row"><span>Manual Overrides</span></div>
+      <div class="cue-grid">
+        <button id="btn-play-music">▶ Force Music On</button>
+        <button id="btn-stop-music">⏹ Mute Music</button>
+        <button id="btn-hide-badge" style="grid-column: span 2;">Hide Setup Box on Stage Screen</button>
+      </div>
+    </div>
+
+    <!-- Optional Second-Device Pairing -->
+    <div class="card" style="margin-bottom: 0;">
+      <div class="label-row"><span>Control From Another Device (Optional)</span></div>
+      <div class="connect-row">
+        <input type="text" id="remote-code-input" placeholder="Enter 4-digit ID from Stage Screen">
+        <button id="btn-connect-remote" style="padding: 10px 18px;">Connect</button>
+      </div>
+      <div class="status-note" id="remote-status">
+        If both tabs are on the same laptop, they sync automatically without entering a code.
+      </div>
+    </div>
   </div>
 
-  <!-- Theater Viewport with interactive stages -->
-  <div class="viewport">
-    <!-- Top display banner: Celebration slogan -->
-    <div class="banner-container" id="ceremony-slogan">
-      <!-- Left 50th Emblem -->
-      <svg class="laurel" viewBox="0 0 120 120">
-        <path d="M 20 50 C 15 75 35 95 60 95 C 85 95 105 75 100 50" fill="none" stroke="gold" stroke-width="2.5" stroke-dasharray="2,2" />
-        <path d="M 20 60 A 40 40 0 0 0 100 60" fill="none" stroke="gold" stroke-width="1.5" />
-        <g stroke="gold" fill="gold">
-          <!-- Leaves Left -->
-          <path d="M 20 50 C 15 45 10 45 12 55 C 15 50 18 48 20 50 Z" />
-          <path d="M 25 65 C 18 62 14 65 17 73 C 20 68 23 66 25 65 Z" />
-          <path d="M 35 80 C 28 80 26 85 31 92 C 33 87 35 84 35 80 Z" />
-          <!-- Leaves Right -->
-          <path d="M 100 50 C 105 45 110 45 108 55 C 105 50 102 48 100 50 Z" />
-          <path d="M 95 65 C 102 62 106 65 103 73 C 100 68 97 66 95 65 Z" />
-          <path d="M 85 80 C 92 80 94 85 89 92 C 87 87 85 84 85 80 Z" />
-        </g>
-        <text x="50%" y="42" font-family="Garamond, serif" font-weight="900" font-size="25" fill="#fff5be
+  <script>
+    const slider = document.getElementById('heat-slider');
+    const heatDisplay = document.getElementById('heat-display');
+    const cueButtons = document.querySelectorAll('[data-heat]');
+    const channel = new BroadcastChannel('cauldron_ceremony_sync');
+
+    let remoteConn = null;
+    let currentHeat = 0;
+
+    function broadcastState(payload) {
+      // 1. Same-computer sync
+      channel.postMessage(payload);
+      localStorage.setItem('cauldron_state', JSON.stringify({ ...payload, ts: Date.now() }));
+
+      // 2. Second-device Wi-Fi sync
+      if (remoteConn && remoteConn.open) {
+        remoteConn.send(payload);
+      }
+    }
+
+    function setHeat(val) {
+      currentHeat = Math.max(0, Math.min(100, parseInt(val, 10)));
+      slider.value = currentHeat;
+      heatDisplay.textContent = currentHeat + '%';
+
+      cueButtons.forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.heat, 10) === currentHeat);
+      });
+
+      broadcastState({ heat: currentHeat });
+    }
+
+    slider.addEventListener('input', (e) => setHeat(e.target.value));
+
+    cueButtons.forEach(btn => {
+      btn.addEventListener('click', () => setHeat(btn.dataset.heat));
+    });
+
+    document.getElementById('btn-play-music').addEventListener('click', () => {
+      broadcastState({ audio: 'play' });
+    });
+
+    document.getElementById('btn-stop-music').addEventListener('click', () => {
+      broadcastState({ audio: 'stop' });
+    });
+
+    document.getElementById('btn-hide-badge').addEventListener('click', () => {
+      broadcastState({ hideBadge: true });
+    });
+
+    // Keyboard shortcuts on Backstage Laptop
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT') return;
+      if (e.key === ' ') {
+        e.preventDefault();
+        const steps = [0, 25, 60, 85, 100];
+        const next = steps.find(s => s > currentHeat) ?? 0;
+        setHeat(next);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setHeat(currentHeat + 5);
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setHeat(currentHeat - 5);
+      }
+    });
+
+    // Remote PeerJS Connection for controlling from a separate phone/iPad
+    const peer = new Peer();
+    document.getElementById('btn-connect-remote').addEventListener('click', () => {
+      const code = document.getElementById('remote-code-input').value.trim();
+      if (!code) return;
+      document.getElementById('remote-status').textContent = 'Connecting to stage screen...';
+
+      remoteConn = peer.connect('cauldron-' + code);
+      remoteConn.on('open', () => {
+        document.getElementById('sync-status').textContent = 'REMOTE CONNECTED';
+        document.getElementById('sync-status').style.borderColor = '#4caf50';
+        document.getElementById('sync-status').style.color = '#81c784';
+        document.getElementById('remote-status').textContent = 'Connected! Sending live controls to stage.';
+        remoteConn.send({ heat: currentHeat, hideBadge: true });
+      });
+      remoteConn.on('error', () => {
+        document.getElementById('remote-status').textContent = 'Connection failed. Check the 4-digit code.';
+      });
+    });
+  </script>
+</body>
+</html>
